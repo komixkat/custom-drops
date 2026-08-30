@@ -1,0 +1,76 @@
+{
+  "presetId": "guaranteed_trophies",
+  "targetMinecraftVersion": "${minecraft_version}",
+  "mobDrops": [
+    {
+      "targetId": "minecraft:shulker",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "pool": [
+        { "itemId": "minecraft:shulker_shell", "weight": 1, "minCount": 2, "maxCount": 2, "chance": 1.0 }
+      ],
+      "conditions": []
+    },
+    {
+      "targetId": "minecraft:ender_dragon",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:elytra", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 1.0 }
+      ],
+      "conditions": []
+    }
+  ],
+  "blockDrops": [],
+  "chestLoot": [
+    {
+      "targetLootTableId": "minecraft:charged_creeper/creeper",
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:creeper_head", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 1.0 }
+      ],
+      "conditions": []
+    },
+    {
+      "targetLootTableId": "minecraft:charged_creeper/zombie",
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:zombie_head", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 1.0 }
+      ],
+      "conditions": []
+    },
+    {
+      "targetLootTableId": "minecraft:charged_creeper/skeleton",
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:skeleton_skull", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 1.0 }
+      ],
+      "conditions": []
+    },
+    {
+      "targetLootTableId": "minecraft:charged_creeper/wither_skeleton",
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:wither_skeleton_skull", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 1.0 }
+      ],
+      "conditions": []
+    },
+    {
+      "targetLootTableId": "minecraft:charged_creeper/piglin",
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:piglin_head", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 1.0 }
+      ],
+      "conditions": []
+    }
+  ],
+  "fishingLoot": [],
+  "equipmentOverrides": [
+    {
+      "targetEntityId": "minecraft:drowned",
+      "isTag": false,
+      "slot": "MAIN_HAND",
+      "dropChance": 2.0
+    }
+  ]
+}

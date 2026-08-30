@@ -1,0 +1,27 @@
+{
+  "presetId": "better_dungeon_loot",
+  "targetMinecraftVersion": "${minecraft_version}",
+  "mobDrops": [],
+  "blockDrops": [],
+  "chestLoot": [
+    {
+      "targetLootTableId": "minecraft:chests/simple_dungeon",
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:enchanted_book", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 0.15 },
+        { "itemId": "minecraft:golden_apple", "weight": 2, "minCount": 1, "maxCount": 1, "chance": 0.2 }
+      ],
+      "conditions": []
+    },
+    {
+      "targetLootTableId": "minecraft:chests/village/village_plains_house",
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:enchanted_book", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 0.1 }
+      ],
+      "conditions": []
+    }
+  ],
+  "fishingLoot": [],
+  "equipmentOverrides": []
+}

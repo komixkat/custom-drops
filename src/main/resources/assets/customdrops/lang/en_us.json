@@ -1,0 +1,49 @@
+{
+  "customdrops.config.title": "Custom Drops",
+  "customdrops.config.enabled": "Enabled",
+  "customdrops.config.replace": "Replace vanilla table entirely",
+  "customdrops.config.overflow": "You have %s entries but only the first %s fit in this editor. The rest are preserved unchanged - use the JSON files directly to manage all of them.",
+
+  "customdrops.config.target.entity": "Entity id (or #tag)",
+  "customdrops.config.target.block": "Block id (or #tag)",
+  "customdrops.config.target.lootTable": "Loot table id",
+
+  "customdrops.config.item.id": "Item %s: item id",
+  "customdrops.config.item.weight": "Item %s: weight",
+  "customdrops.config.item.minCount": "Item %s: minimum count",
+  "customdrops.config.item.maxCount": "Item %s: maximum count",
+  "customdrops.config.item.chance": "Item %s: chance (0-1)",
+
+  "customdrops.config.condition.killedByPlayer": "Only when killed by a player",
+  "customdrops.config.condition.silkTouch": "Require Silk Touch",
+  "customdrops.config.condition.noSilkTouch": "Require NOT Silk Touch",
+  "customdrops.config.condition.useRandomChance": "Add an extra random-chance condition",
+  "customdrops.config.condition.randomChanceValue": "Random-chance value (0-1)",
+
+  "customdrops.config.category.mobDrops": "Mob Drops",
+  "customdrops.config.mobDrops.description": "Control what a specific mob (or entity tag) drops when it dies. Each entry below can add up to two items on top of (or instead of) its normal drops.",
+
+  "customdrops.config.category.blockDrops": "Block Drops",
+  "customdrops.config.blockDrops.description": "Control what a specific block (or block tag) drops when broken.",
+
+  "customdrops.config.category.chestLoot": "Chest Loot",
+  "customdrops.config.chestLoot.description": "Control any loot table by its id - not just chests. Dungeon and village chests, trial chamber vault rewards, suspicious sand and gravel, and more all work here. See the Browse tab for real ids.",
+
+  "customdrops.config.category.fishingLoot": "Fishing Loot",
+  "customdrops.config.fishingLoot.description": "Control fishing-specific loot tables (the overall pool, or just the fish, junk, or treasure sub-pools). Works the same way as Chest Loot, kept separate for organization.",
+
+  "customdrops.config.category.equipment": "Equipment Drop Overrides",
+  "customdrops.config.equipment.description": "Force a mob's held or worn item to always drop on death, instead of the normal small chance. This does not add new items - it only affects equipment the mob already spawned with.",
+  "customdrops.config.equipment.slot": "Equipment slot",
+
+  "customdrops.config.category.browse": "Browse Loot Tables",
+  "customdrops.config.browse.empty": "No bundled loot table list found - rebuild the mod so extractVanillaLootTables can run.",
+  "customdrops.config.browse.hint": "%s known loot table ids. Type in the search box above to filter.",
+
+  "customdrops.config.category.serverInfo": "Server Info",
+  "customdrops.config.serverInfo.notConnected": "Not currently connected to a server running Custom Drops.",
+
+  "customdrops.config.category.presets": "Presets (optional shortcuts)",
+  "customdrops.config.presets.description": "Picking a preset replaces every category's entries above with that preset's defaults. Leave on 'none' to configure everything yourself.",
+  "customdrops.config.presets.active": "Active preset"
+}

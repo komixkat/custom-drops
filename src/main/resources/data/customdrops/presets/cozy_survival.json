@@ -1,0 +1,21 @@
+{
+  "presetId": "cozy_survival",
+  "targetMinecraftVersion": "${minecraft_version}",
+  "mobDrops": [
+    {
+      "targetId": "minecraft:zombie",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "pool": [
+        { "itemId": "minecraft:iron_ingot", "weight": 1, "minCount": 1, "maxCount": 1, "chance": 0.1 }
+      ],
+      "conditions": [
+        { "type": "KILLED_BY_PLAYER", "params": {} }
+      ]
+    }
+  ],
+  "blockDrops": [],
+  "chestLoot": [],
+  "fishingLoot": [],
+  "equipmentOverrides": []
+}
