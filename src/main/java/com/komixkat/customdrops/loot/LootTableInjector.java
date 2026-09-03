@@ -101,6 +101,12 @@ public final class LootTableInjector {
     }
 
     private Optional<MatchedEntry> matchDirect(String targetId, Identifier tableId, List<LootItemEntry> pool, List<LootConditionEntry> conditions, boolean replaceVanillaTable) {
+        if (targetId.endsWith("*")) {
+            String prefix = targetId.substring(0, targetId.length() - 1);
+            return tableId.toString().startsWith(prefix)
+                ? Optional.of(new MatchedEntry(pool, conditions, replaceVanillaTable))
+                : Optional.<MatchedEntry>empty();
+        }
         return IdentifierResolver.resolve(targetId).flatMap(expected ->
             expected.equals(tableId)
                 ? Optional.of(new MatchedEntry(pool, conditions, replaceVanillaTable))

@@ -1,12 +1,28 @@
 {
-  "customdrops.config.title": "Custom Drops",
+  "customdrops.menu.title": "Custom Drops",
+  "customdrops.menu.info": "Mod Info",
+  "customdrops.menu.settings": "Mod Settings",
+  "customdrops.menu.config": "Mod Config",
+  "customdrops.menu.worldSettings": "World Settings",
+  "customdrops.menu.serverConfig": "Server Config",
+  "customdrops.menu.search": "Search",
+
+  "customdrops.worldSettings.unavailable": "World Settings only work while you're in a singleplayer or LAN-hosted world. Join or host a world first, or use Mod Config to set global defaults instead.",
+
+  "customdrops.info.what": "Custom Drops lets you change what mobs, blocks, chests, and fishing spots drop, and force equipment to always drop, without editing datapacks by hand.",
+  "customdrops.info.howToStart": "Start in Mod Config. Pick a category, fill in the target and item fields (an example is pre-filled), then Save and Quit. Use /customdrops reload in-game to apply changes without restarting.",
+  "customdrops.info.wildcards": "Chest Loot and Fishing Loot targets can end with * to match every loot table starting with that prefix - e.g. minecraft:chests/village/* matches all 11 village building loot tables in one entry.",
+  "customdrops.info.docs": "See EDITABLE_DROPS.md in the mod's repository for a full list of known loot table ids, and VERSION_COMPATIBILITY.md for what's been verified against real game data.",
+
+  "customdrops.config.wildcard.hint": "Tip: end the target with * to match every loot table starting with that prefix (e.g. minecraft:chests/village/*).",
+
   "customdrops.config.enabled": "Enabled",
   "customdrops.config.replace": "Replace vanilla table entirely",
   "customdrops.config.overflow": "You have %s entries but only the first %s fit in this editor. The rest are preserved unchanged - use the JSON files directly to manage all of them.",
 
   "customdrops.config.target.entity": "Entity id (or #tag)",
   "customdrops.config.target.block": "Block id (or #tag)",
-  "customdrops.config.target.lootTable": "Loot table id",
+  "customdrops.config.target.lootTable": "Loot table id (or prefix*)",
 
   "customdrops.config.item.id": "Item %s: item id",
   "customdrops.config.item.weight": "Item %s: weight",
@@ -27,7 +43,7 @@
   "customdrops.config.blockDrops.description": "Control what a specific block (or block tag) drops when broken.",
 
   "customdrops.config.category.chestLoot": "Chest Loot",
-  "customdrops.config.chestLoot.description": "Control any loot table by its id - not just chests. Dungeon and village chests, trial chamber vault rewards, suspicious sand and gravel, and more all work here. See the Browse tab for real ids.",
+  "customdrops.config.chestLoot.description": "Control any loot table by its id - not just chests. Dungeon and village chests, trial chamber vault rewards, suspicious sand and gravel, and more all work here. See the Search screen for real ids.",
 
   "customdrops.config.category.fishingLoot": "Fishing Loot",
   "customdrops.config.fishingLoot.description": "Control fishing-specific loot tables (the overall pool, or just the fish, junk, or treasure sub-pools). Works the same way as Chest Loot, kept separate for organization.",
@@ -36,14 +52,12 @@
   "customdrops.config.equipment.description": "Force a mob's held or worn item to always drop on death, instead of the normal small chance. This does not add new items - it only affects equipment the mob already spawned with.",
   "customdrops.config.equipment.slot": "Equipment slot",
 
-  "customdrops.config.category.browse": "Browse Loot Tables",
   "customdrops.config.browse.empty": "No bundled loot table list found - rebuild the mod so extractVanillaLootTables can run.",
   "customdrops.config.browse.hint": "%s known loot table ids. Type in the search box above to filter.",
 
-  "customdrops.config.category.serverInfo": "Server Info",
   "customdrops.config.serverInfo.notConnected": "Not currently connected to a server running Custom Drops.",
 
   "customdrops.config.category.presets": "Presets (optional shortcuts)",
-  "customdrops.config.presets.description": "Picking a preset replaces every category's entries above with that preset's defaults. Leave on 'none' to configure everything yourself.",
+  "customdrops.config.presets.description": "Picking a preset replaces every category's entries with that preset's defaults. Leave on 'none' to configure everything yourself.",
   "customdrops.config.presets.active": "Active preset"
 }

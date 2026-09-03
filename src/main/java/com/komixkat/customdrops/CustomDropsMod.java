@@ -129,20 +129,22 @@ public final class CustomDropsMod implements ModInitializer {
     }
 
     private static void warnOnUnknownLootTableIds(CustomDropsConfig config) {
-        config.chestLoot().forEach(entry -> {
-            if (!VanillaLootTableRegistry.isKnownOrUnverifiable(entry.targetLootTableId())) {
-                LOGGER.warn("Chest loot entry targets '{}', which isn't in the known vanilla loot table list. "
-                    + "This is fine if it's from a datapack or another mod; if it's meant to be vanilla, double-check the id.",
-                    entry.targetLootTableId());
-            }
-        });
-        config.fishingLoot().forEach(entry -> {
-            if (!VanillaLootTableRegistry.isKnownOrUnverifiable(entry.targetLootTableId())) {
-                LOGGER.warn("Fishing loot entry targets '{}', which isn't in the known vanilla loot table list. "
-                    + "This is fine if it's from a datapack or another mod; if it's meant to be vanilla, double-check the id.",
-                    entry.targetLootTableId());
-            }
-        });
+        config.chestLoot().forEach(entry -> checkAndWarn(entry.targetLootTableId()));
+        config.fishingLoot().forEach(entry -> checkAndWarn(entry.targetLootTableId()));
+    }
+
+    private static void checkAndWarn(String targetId) {
+        if (targetId.endsWith("*")) return;
+        if (VanillaLootTableRegistry.isKnownOrUnverifiable(targetId)) return;
+
+        String leaf = targetId.contains("/") ? targetId.substring(targetId.lastIndexOf('/') + 1) : targetId;
+        List<String> suggestions = VanillaLootTableRegistry.search(leaf);
+        if (!suggestions.isEmpty()) {
+            LOGGER.warn("'{}' isn't a known vanilla loot table id. Did you mean one of: {}",
+                targetId, String.join(", ", suggestions.stream().limit(5).toList()));
+        } else {
+            LOGGER.warn("'{}' isn't a known vanilla loot table id. This is fine if it's from a datapack or another mod.", targetId);
+        }
     }
 
     public static CustomDropsConfig config() {

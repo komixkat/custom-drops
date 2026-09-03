@@ -77,7 +77,90 @@ names are best-effort and flagged below rather than guessed silently.
    against a real checkout.
 3. **Minimum supported version** — set to 26.2 per the doc's explicit floor.
 
-## ModMenu UI overhaul (unverified — written without a test build)
+## Real multi-screen navigation (this phase — higher confidence than most prior GUI work)
+
+Direct response to feedback that the previous flat-tabs-with-string-syntax
+UI (and later, flat-tabs-with-widgets UI) still wasn't the right paradigm.
+This phase replaces the Cloth Config tab bar entirely with genuine
+click-through navigation: a root screen with real vanilla buttons, leading
+to intermediate and leaf screens, matching how ModMenu's own settings
+screen and vanilla's Pause menu work.
+
+**Unusually for GUI work this session, this is grounded in real decompiled
+source, not guesses**: `net.minecraft.client.gui.screens.Screen`,
+`Button.builder(...).width(...).build()`, `GridLayout`/`FrameLayout`, and
+`this.minecraft.gui.setScreen(...)` were all confirmed by decompiling
+vanilla's actual `PauseScreen.java` (via `gradle
+genSourcesWithVineflower`) and ModMenu's actual shipped
+`ModMenuOptionsScreen.java` (via Vineflower run directly against
+ModMenu's compiled jar, since it doesn't publish a sources jar — Loom
+already has Vineflower as a build tool dependency, so this needed no new
+tooling, just pointing it at a different jar). Both are real, currently-
+shipping code for this exact Minecraft version and fabric-api version.
+
+That said — **this has not been compiled or run**, so "confirmed API
+shape" is not the same as "confirmed to compile." The specific things
+worth checking first if the build fails:
+- `GridLayout.RowHelper.addChild(Widget)` (single-arg, no colspan) — seen
+  in `PauseScreen` for 1-column additions; used here for a simple
+  vertical button list.
+- `FrameLayout.alignInRectangle(layout, x, y, w, h, xAlign, yAlign)` for
+  centering the button grid.
+- `Minecraft.getInstance().getSingleplayerServer()` returning
+  `IntegratedServer` (confirmed used in `PauseScreen` for its own
+  singleplayer-specific button logic) — used here in `WorldConfigLocator`
+  to find the per-world config directory client-side.
+
+### New structure
+- `CustomDropsRootScreen` — real button grid: Mod Info / Mod Settings /
+  Mod Config / World Settings / Server Config / Search / Done.
+- `CustomDropsConfigCategoriesScreen` — intermediate screen for both
+  "Mod Config" and "World Settings" (parameterized by a `worldMode`
+  boolean), listing the 5 drop categories + Presets as buttons.
+- `CustomDropsScreens` — static factory methods building each leaf
+  screen. These reuse 100% of the widget logic from the prior
+  tabs-based phase (text fields, int sliders, float fields, boolean
+  toggles, sub-category grouping per entry) — that part was never the
+  problem and needed no changes, just relocating into standalone
+  single-category screens instead of tabs of one shared screen.
+- `WorldConfigLocator` — resolves the active singleplayer/hosted world's
+  config directory, or `null` if not in one (remote multiplayer, or no
+  world loaded), which each leaf screen checks before rendering an editor
+  versus an "unavailable" message.
+
+### Also added this phase
+- **Wildcard targeting** for Chest Loot / Fishing Loot: a target ending in
+  `*` matches every real loot table id starting with that prefix. This
+  directly fixes the "one entry per village building" problem — 11
+  entries become 1 (`minecraft:chests/village/*`). Pure backend logic in
+  `LootTableInjector.matchDirect`, no GUI risk.
+- **"Did you mean" warnings**: an unrecognized Chest/Fishing target now
+  gets checked against the real bundled loot table list, searching by its
+  last path segment, and suggests up to 5 close matches in the log.
+
+### Known, honestly-flagged gaps (not attempted this phase)
+- **Specific enchantments on dropped items are not supported.** The item
+  schema is bare `itemId` only — there's no way to make a dropped item
+  "an enchanted book with Mending" specifically, only "a plain enchanted
+  book" (which vanilla renders as un-enchanted, since the enchantment
+  itself is separate NBT/component data the current schema has no field
+  for). Adding this needs a `LootItemFunction`-equivalent to what
+  `LootConditionRegistry`'s custom `LootItemCondition` already
+  demonstrates is achievable, but `LootItemFunction`'s real interface
+  contract for MC 26.2 hasn't been confirmed the way `LootItemCondition`
+  has. This is the natural next phase if wanted.
+- **No true autocomplete/dropdown-while-typing for item or entity ids.**
+  Cloth Config's `startTextField` is plain text entry; a live-filtering
+  suggestion dropdown would need custom rendering code on top of it. The
+  Search screen (browse + Cloth Config's own built-in filter) and the
+  new "did you mean" log warnings are the current, safer stand-ins.
+- **Server Config is read-only by design.** A client can see what a
+  server reports, but can't push changes to it — that would need a
+  permission-gated client-to-server edit-request protocol, which is a
+  meaningfully bigger feature (and a bigger trust/security surface) than
+  anything else in this mod so far.
+
+## ModMenu UI overhaul (superseded by the phase above — kept for history)
 
 Direct response to real usability feedback from testing the previous UI:
 hover tooltips were covering buttons and blocking clicks, tooltip text was

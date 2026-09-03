@@ -12,6 +12,40 @@ a long-standing loot-table convention from before the 26.x rename wave
 that probably still holds, but hasn't been directly re-checked — there's
 only one of these left in the whole doc now (smithing trims).
 
+## Current limitations (be aware of these before designing a config)
+
+- **No specific enchantments on dropped items.** You can add
+  `minecraft:enchanted_book` as a drop, but there's no way yet to specify
+  "with Mending on it" — you'd get a plain, unenchanted book. This needs a
+  schema extension (a loot-function-equivalent to apply an enchantment)
+  that hasn't been built yet. If your goal was "chance of a Mending book,"
+  this isn't achievable with the current version.
+- **No true autocomplete while typing.** The Search screen lets you browse
+  and filter the 1354 known loot table ids, and Chest/Fishing entries with
+  an unrecognized target get a "did you mean" suggestion logged, but
+  there's no live dropdown-while-typing in the entry fields themselves.
+
+## Wildcard targeting
+
+Chest Loot and Fishing Loot targets can end with `*` to match every real
+loot table id starting with that prefix, instead of needing one entry per
+table. This is the answer to "there's no single village chest table, there
+are 11" — one wildcard entry covers all of them:
+
+```
+minecraft:chests/village/*
+```
+
+matches every entry in the Village chests section below (armorer, butcher,
+plains house, savanna house, etc.) in a single rule. Same idea works for
+any prefix — `minecraft:chests/trial_chambers/*` covers every trial
+chamber loot table at once, `minecraft:chests/bastion_*` covers all four
+bastion variants, and so on.
+
+Mob Drops and Block Drops don't support wildcards this way (their `#tag`
+prefix already covers the "match a group of related entities/blocks"
+case reasonably well — e.g. `#minecraft:skeletons`).
+
 ## The four config categories, and what they really cover
 
 ### Mob Drops (`mobDrops` / ModMenu "Mob Drops")
