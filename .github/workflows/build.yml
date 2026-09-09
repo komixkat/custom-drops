@@ -5,6 +5,8 @@ on:
     branches:
       - master
       - main
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -19,9 +21,12 @@ jobs:
     steps:
       - name: Discover Minecraft releases and resolve per-version build inputs
         id: discover
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
         run: |
           python3 - <<'PY'
-          import json, re, urllib.request
+          import json, os, re, subprocess, urllib.request
           from xml.etree import ElementTree
 
           def ver(v):
@@ -39,6 +44,12 @@ jobs:
           def vkey(version):
               return tuple(int(x) for x in re.split(r'[.+_-]', version) if x.isdigit())
 
+          def release_exists(mc):
+              proc = subprocess.run(
+                  ['gh', 'release', 'view', f'v{mc}', '--repo', os.environ['GITHUB_REPOSITORY']],
+                  capture_output=True)
+              return proc.returncode == 0
+
           manifest = nj('https://piston-meta.mojang.com/mc/game/version_manifest_v2.json')
           releases = sorted(
               (v for v in manifest['versions'] if v['type'] == 'release' and ver(v['id']) >= (26, 2)),
@@ -50,6 +61,11 @@ jobs:
           targets = []
           for rel in releases:
               mc = rel['id']
+
+              if os.environ.get('EVENT') == 'schedule' and release_exists(mc):
+                  print(f'{mc}: v{mc} release already exists, skipping', flush=True)
+                  continue
+
               meta = nj(rel['url'])
               java = max(int((meta.get('javaVersion') or {}).get('majorVersion') or 25), 25)
 
@@ -67,6 +83,9 @@ jobs:
               })
               print(f'resolved {mc}: java={java} loader={loader} fabric_api={fabric_api}', flush=True)
 
+          if not targets:
+              print('no new Minecraft releases to build, stopping', flush=True)
+
           with open('targets.json', 'w') as out:
               json.dump(targets, out)
           PY
@@ -75,6 +94,7 @@ jobs:
 
   build:
     needs: discover-versions
+    if: needs.discover-versions.outputs.targets != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -109,6 +129,7 @@ jobs:
 
   check-api-drift:
     needs: discover-versions
+    if: needs.discover-versions.outputs.targets != '[]'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -174,7 +195,7 @@ jobs:
           path: api-drift-report/
 
   release:
-    if: github.event_name == 'push'
+    if: (github.event_name == 'push' || github.event_name == 'schedule') && needs.discover-versions.outputs.targets != '[]'
     needs: [discover-versions, build]
     runs-on: ubuntu-latest
     steps:
