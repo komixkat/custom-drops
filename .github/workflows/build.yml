@@ -83,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ matrix.target.java }}
@@ -122,7 +122,7 @@ jobs:
           echo "java=$(echo "$NEWEST_TARGET" | jq -r '.java')" >> "$GITHUB_OUTPUT"
           echo "loader=$(echo "$NEWEST_TARGET" | jq -r '.loader')" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ steps.newest.outputs.java }}
@@ -193,10 +193,12 @@ jobs:
             jars=( "$dir"/*.jar )
             [ -e "${jars[0]}" ] || continue
             echo "Publishing v${mc}"
+            if gh release view "v${mc}" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              gh release delete "v${mc}" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag
+            fi
             gh release create "v${mc}" "${jars[@]}" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" \
               --title "Custom Drops v${mc}" \
-              --notes "Custom Drops for Minecraft ${mc}, built automatically by GitHub Actions." \
-              --clobber
+              --notes "Custom Drops for Minecraft ${mc}, built automatically by GitHub Actions."
           done
