@@ -1,0 +1,123 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.17.19'
+    id 'maven-publish'
+}
+
+def targetMinecraftVersion = project.findProperty('minecraft_version') ?: minecraft_version
+def targetModVersion = project.findProperty('mod_version') ?: "${targetMinecraftVersion}-b0"
+
+version = targetModVersion
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    maven { url 'https://maven.shedaniel.me/' }
+    maven { url 'https://maven.terraformersmc.com/releases/' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${targetMinecraftVersion}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    implementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+}
+
+processResources {
+    inputs.property 'version', targetModVersion
+    inputs.property 'minecraft_version', targetMinecraftVersion
+    filesMatching('fabric.mod.json') {
+        expand version: targetModVersion, minecraft_version: targetMinecraftVersion
+    }
+    filesMatching('data/customdrops/presets/*.json') {
+        expand minecraft_version: targetMinecraftVersion
+    }
+}
+
+def generatedResourcesDir = layout.buildDirectory.dir("generated/customdrops/resources")
+
+def extractVanillaLootTables = tasks.register('extractVanillaLootTables') {
+    group = 'customdrops'
+    description = 'Extracts the real list of vanilla loot table identifiers from the downloaded Minecraft jar, for preset authoring and in-game id validation warnings. Never fails the build; skips with a warning if it cannot find the jar.'
+    outputs.dir(generatedResourcesDir)
+    doLast {
+        def searchRoots = [
+            file("${projectDir}/.gradle/loom-cache/minecraftMaven/net/minecraft"),
+            file("${gradle.gradleUserHomeDir}/loom-cache/minecraftMaven/net/minecraft"),
+            file("${gradle.gradleUserHomeDir}/caches/fabric-loom/minecraftMaven/net/minecraft")
+        ]
+
+        File jarFile = null
+        searchRoots.each { root ->
+            if (jarFile == null && root.exists()) {
+                root.eachFileRecurse { candidate ->
+                    if (jarFile == null
+                        && candidate.name.endsWith('.jar')
+                        && !candidate.name.contains('sources')
+                        && !candidate.name.contains('backup')
+                        && candidate.path.contains(targetMinecraftVersion)) {
+                        jarFile = candidate
+                    }
+                }
+            }
+        }
+
+        def outDir = generatedResourcesDir.get().asFile
+        def targetDir = new File(outDir, 'data/customdrops/generated')
+        targetDir.mkdirs()
+        def outputFile = new File(targetDir, 'vanilla_loot_tables.txt')
+
+        if (jarFile == null) {
+            logger.warn("customdrops: could not locate the downloaded Minecraft ${targetMinecraftVersion} jar under any known loom-cache path; skipping real loot table extraction. Bundled reference list in EDITABLE_DROPS.md remains inferred, not verified, until this succeeds.")
+            outputFile.text = ''
+            return
+        }
+
+        def identifiers = new TreeSet<String>()
+        def zip = new java.util.zip.ZipFile(jarFile)
+        try {
+            zip.entries().each { entry ->
+                def name = entry.name
+                if (!entry.directory && name.toLowerCase().contains('loot_table') && name.endsWith('.json')) {
+                    def matcher = (name =~ /data\/([^\/]+)\/loot_tables?\/(.+)\.json$/)
+                    if (matcher.find()) {
+                        identifiers.add("${matcher.group(1)}:${matcher.group(2)}")
+                    }
+                }
+            }
+        } finally {
+            zip.close()
+        }
+
+        outputFile.text = identifiers.join('\n')
+        logger.lifecycle("customdrops: extracted ${identifiers.size()} real vanilla loot table identifiers from ${jarFile.name} into ${outputFile}")
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir extractVanillaLootTables
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+    from('LICENSE') {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}

@@ -1,61 +1,75 @@
 # Custom Drops
 
-A Fabric mod that lets you customize what mobs, blocks, chests, fishing
-spots, and equipment drop, entirely through an in-game menu. No datapack
-editing required.
+Custom Drops is a Fabric mod that lets you control what things drop in Minecraft, right from an in-game menu. No datapack skill needed.
+
+You can change what mobs drop when they die, what blocks drop when you break them, what shows up in chests and fishing, and force a mob's equipment (like a drowned's trident) to always drop. Every change applies immediately in singleplayer when you save.
 
 ## Features
 
-- Rewrite loot tables for mobs, blocks, chests, fishing, and more (trial
-  chambers, archaeology, shearing, charged-creeper heads, and anything
-  else built on Minecraft's loot table system - see `EDITABLE_DROPS.md`)
-- Wildcard targeting: `minecraft:chests/village/*` matches every village
-  building's loot table in one entry, instead of needing one per building
-- Force mob equipment (like a drowned's trident) to always drop
-- Built-in presets: Cozy Survival, Better Dungeon Loot, Guaranteed Trophies
-- Real in-game menu: navigate Mod Info → Mod Settings → Mod Config →
-  category → entry, using actual buttons, sliders, toggles, and dropdowns
-  (works via ModMenu, or standalone with the `/customdrops` command)
-- Per-world config that overrides the global default, without needing a
-  server restart
-- Multiplayer-aware: a connected server quietly reports what it's running
-  to clients with the mod installed (visible in the Server Config screen,
-  never a chat announcement), and client-side logic never touches loot
-  tables itself when connected to someone else's server
-- Default install behaves exactly like vanilla until you change something
+- **Loot table control.** Mob drops, block drops, chest loot, fishing loot, and more (shearing, archaeology, trial chambers, even charged-creeper heads). Anything built on Minecraft's loot table system is fair game.
+- **Wildcard targeting.** One rule like `minecraft:chests/village/*` covers every village building at once, instead of writing a rule per building.
+- **Force equipment drops.** Want a drowned to always drop its trident, or an evoker to drop its totem? Just turn it on for that mob and slot.
+- **Per-item conditions and enchantments.** Fine-tune when an item drops (killed by player, on fire, silk touch, fortune level) and what enchantments ride along with it.
+- **Fortune support.** Ore rules can scale extra drops with your Fortune level instead of being a flat number.
+- **Rule search.** With a few hundred rules loaded, a search box filters the list instantly.
+- **Complete autocomplete.** Every item, block, entity, and loot table field offers live suggestions as you type.
+- **Built-in presets.** Six hand-made presets, each with roughly 100 rules, replace the config in one click:
+  - **Trophy Hunter** (every mob has a rare head or keepsake to chase)
+  - **Lootery Plus** (a rich, slightly above vanilla loot overhaul)
+  - **Explorer's Fortune** (every structure and archaeology site pays off)
+  - **Civilized Survival** (fair quality of life, crops and animals give a little extra)
+  - **Ocean Depths** (the sea is worth diving into)
+  - **OP X** (goofy amounts of loot and bosses drop endgame spoils)
+- **Explicit confirmations.** Switching presets, changing the active profile, or linking a world to a config always asks for confirmation first, so nothing is ever overwritten by accident.
+- **Per-world config.** Each world can have its own drop settings that override the global default, without a server restart.
+- **Multiplayer aware.** When you connect to a server running the mod, the client quietly shows what the server uses in the settings screen. It never broadcasts it in chat, and it never touches loot tables on someone else's server.
+- **Vanilla until you change something.** Fresh installs behave exactly like plain Minecraft. The menu is only there when you want it.
+
+## Presets
+
+The in-game presets screen lists all six presets with a short description. Picking one replaces every category's entries with that preset's rules. You can start from a preset and then edit individual rules on top of it.
+
+## Requirements
+
+- Minecraft Java Edition for the version you download (see Releases below)
+- Fabric Loader 0.19.3 or newer
+- Fabric API (hard dependency)
+
+ModMenu is recommended. It is the easiest way to open the config screen. Without it you can still open the menu with the `/customdrops` command.
 
 ## Installation
 
-Requires Fabric Loader 0.19.3+ and Fabric API. Fabric API is a hard
-dependency; ModMenu and Cloth Config are recommended (the mod's core
-logic works without them, but you'll need Cloth Config for the in-game
-menu). Download the jar for your Minecraft version from the Releases page
-and drop it in your mods folder.
+1. Download the jar for your Minecraft version from the [Releases](https://github.com/komixkat/custom-drops/releases) page. Each Minecraft release has its own tag (for example `v26.2`), so pick the one matching your game version.
+2. Put the jar in your `mods` folder.
+3. Launch the game with Fabric and Fabric API installed.
 
-## Configuration
+Updates to the same Minecraft version replace the previous jar in place. When a new Minecraft version is released, its own tag and jar show up on the Releases page automatically.
 
-Open the config screen from ModMenu (or via `/customdrops` if you're not
-using ModMenu). The menu is organized as:
+## In-game configuration
 
-- **Mod Info** — what the mod does and how to get started
-- **Mod Settings** — quick per-category on/off toggles and the preset
-  switcher
-- **Mod Config** — the actual editing screens, one per category (Mob
-  Drops, Block Drops, Chest Loot, Fishing Loot, Equipment Overrides),
-  each with real text fields, sliders, and toggles per entry
-- **World Settings** — the same editing screens, but scoped to your
-  current singleplayer/hosted world specifically, overriding the global
-  default for that world only
-- **Server Config** — read-only: what a connected server reports running
-- **Search** — browse and filter every known real loot table id
+Open the config screen from ModMenu, or run `/customdrops`. The menu is organized into:
 
-Changes take effect on save; use `/customdrops reload` in-game to apply
-edits made directly to the JSON files without restarting. See
-`EDITABLE_DROPS.md` for a full list of known loot table ids and
-`VERSION_COMPATIBILITY.md` for what's been verified against real
-decompiled game data versus what's still inferred.
+- **Mob Drops.** What mobs drop when they die.
+- **Block Drops.** What blocks drop when broken.
+- **Chest Loot.** Any loot table by its id (dungeons, villages, trial chambers, archaeology, and more).
+- **Fishing Loot.** What the fishing loot tables hand out.
+- **Equipment.** Force mob equipment to always drop.
+- **Settings.** Category toggles, the preset selector, browsing loot tables, and export/import of your config.
+
+## Building from source
+
+Clone the repository and run:
+
+```
+./gradlew build
+```
+
+The build also bundles a full reference list of vanilla loot tables and item, block, and entity ids for the running game version, so autocomplete and preset validation always match the version they were built for.
+
+Every Minecraft version is built and released automatically by GitHub Actions, so you usually never need to build it yourself.
 
 ## License
 
-PolyForm Noncommercial 1.0.0. Free to use and modify, not for commercial
-use.
+PolyForm Noncommercial 1.0.0. Free to use and modify for personal and noncommercial projects. See the LICENSE file for details.
+
+The pre-rebuild version of this mod is archived under `legacy/` for reference.

@@ -1,11 +1,15 @@
-name: Build
+name: Build & Release
 
 on:
   push:
     branches:
-      - main
       - master
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   discover-versions:
@@ -13,34 +17,67 @@ jobs:
     outputs:
       targets: ${{ steps.discover.outputs.targets }}
     steps:
-      - name: Discover Minecraft versions and their required Java version
+      - name: Discover Minecraft releases and resolve per-version build inputs
         id: discover
         run: |
-          curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json > manifest.json
+          curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json -o manifest.json
+          python3 - > targets.json <<'PY'
+          import json, re, urllib.request
+          from xml.etree import ElementTree
 
-          IDS=$(jq -r '
-              def parts: [splits("\\.")] | map(tonumber);
-              def ge(a; b):
-                (a[0] > b[0]) or
-                (a[0] == b[0] and ((a[1] // 0) > (b[1] // 0))) or
-                (a[0] == b[0] and (a[1] // 0) == (b[1] // 0) and (a[2] // 0) >= (b[2] // 0));
-              .versions[] | select(.type == "release") | select(.id as $i | ($i | parts) as $p | ge($p; "26.2" | parts)) | .id
-          ' manifest.json)
+          def ver(v):
+              return tuple(int(x) for x in str(v).split('.'))
 
-          TARGETS="[]"
-          for id in $IDS; do
-            url=$(jq -r --arg id "$id" '.versions[] | select(.id == $id) | .url' manifest.json)
-            java=$(curl -s "$url" | jq -r '.javaVersion.majorVersion // 21')
-            TARGETS=$(echo "$TARGETS" | jq --arg id "$id" --argjson java "$java" '. + [{minecraft: $id, java: $java}]')
-          done
+          def nj(url):
+              with urllib.request.urlopen(url, timeout=60) as r:
+                  return json.load(r)
 
-          echo "Discovered targets: $TARGETS"
-          echo "targets=$(echo "$TARGETS" | jq -c .)" >> "$GITHUB_OUTPUT"
+          def meta_versions(url):
+              with urllib.request.urlopen(url, timeout=60) as r:
+                  root = ElementTree.fromstring(r.read())
+              return [e.text for e in root.findall('.//version') if e.text]
+
+          def vkey(version):
+              return tuple(int(x) for x in re.split(r'[.+_-]', version) if x.isdigit())
+
+          manifest = nj('https://piston-meta.mojang.com/mc/game/version_manifest_v2.json')
+          releases = sorted(
+              (v for v in manifest['versions'] if v['type'] == 'release' and ver(v['id']) >= (26, 2)),
+              key=lambda v: ver(v['id']))
+
+          fabric_api_versions = meta_versions(
+              'https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml')
+
+          targets = []
+          for rel in releases:
+              mc = rel['id']
+              meta = nj(rel['url'])
+              java = max(int((meta.get('javaVersion') or {}).get('majorVersion') or 25), 25)
+
+              loaders = nj(f'https://meta.fabricmc.net/v2/versions/loader/{mc}')
+              loader = loaders[0]['loader']['version'] if loaders else ''
+
+              api_candidates = [v for v in fabric_api_versions if v.endswith('+' + mc)]
+              fabric_api = max(api_candidates, key=vkey) if api_candidates else ''
+
+              targets.append({
+                  'minecraft': mc,
+                  'java': java,
+                  'loader': loader,
+                  'fabric_api': fabric_api,
+              })
+              print(f'resolved {mc}: java={java} loader={loader} fabric_api={fabric_api}', flush=True)
+
+          print(json.dumps(targets))
+          PY
+          cat targets.json
+          echo "targets=$(cat targets.json)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: discover-versions
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         target: ${{ fromJson(needs.discover-versions.outputs.targets) }}
     steps:
@@ -56,10 +93,14 @@ jobs:
           gradle-version: 9.5.1
 
       - name: Build for Minecraft ${{ matrix.target.minecraft }} (Java ${{ matrix.target.java }})
-        run: >
-          gradle build
-          -Pminecraft_version=${{ matrix.target.minecraft }}
-          -Pmod_version=${{ matrix.target.minecraft }}-b${{ github.run_number }}
+        env:
+          LOADER: ${{ matrix.target.loader }}
+          FABRIC_API: ${{ matrix.target.fabric_api }}
+        run: |
+          ARGS="-Pminecraft_version=${{ matrix.target.minecraft }} -Pmod_version=${{ matrix.target.minecraft }}"
+          if [ -n "$LOADER" ]; then ARGS="$ARGS -Ploader_version=$LOADER"; fi
+          if [ -n "$FABRIC_API" ]; then ARGS="$ARGS -Pfabric_version=$FABRIC_API"; fi
+          gradle build $ARGS
 
       - uses: actions/upload-artifact@v4
         with:
@@ -79,6 +120,7 @@ jobs:
           NEWEST_TARGET=$(echo '${{ needs.discover-versions.outputs.targets }}' | jq -c 'max_by(.minecraft | split(".") | map(tonumber))')
           echo "version=$(echo "$NEWEST_TARGET" | jq -r '.minecraft')" >> "$GITHUB_OUTPUT"
           echo "java=$(echo "$NEWEST_TARGET" | jq -r '.java')" >> "$GITHUB_OUTPUT"
+          echo "loader=$(echo "$NEWEST_TARGET" | jq -r '.loader')" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v4
         with:
@@ -90,7 +132,7 @@ jobs:
           gradle-version: 9.5.1
 
       - name: Decompile Minecraft ${{ steps.newest.outputs.version }} sources
-        run: gradle genSourcesWithVineflower -Pminecraft_version=${{ steps.newest.outputs.version }}
+        run: gradle genSourcesWithVineflower -Pminecraft_version=${{ steps.newest.outputs.version }} -Ploader_version=${{ steps.newest.outputs.loader }}
 
       - name: Extract signatures of tracked classes
         run: |
@@ -135,14 +177,26 @@ jobs:
     if: github.event_name == 'push'
     needs: [discover-versions, build]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - uses: softprops/action-gh-release@v2
-        with:
-          tag_name: build-${{ github.run_number }}
-          files: artifacts/**/*.jar
+      - name: Publish one release per Minecraft version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for dir in artifacts/customdrops-*; do
+            [ -d "$dir" ] || continue
+            mc="${dir#artifacts/customdrops-}"
+            jars=( "$dir"/*.jar )
+            [ -e "${jars[0]}" ] || continue
+            echo "Publishing v${mc}"
+            gh release create "v${mc}" "${jars[@]}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "Custom Drops v${mc}" \
+              --notes "Custom Drops for Minecraft ${mc}, built automatically by GitHub Actions." \
+              --clobber
+          done

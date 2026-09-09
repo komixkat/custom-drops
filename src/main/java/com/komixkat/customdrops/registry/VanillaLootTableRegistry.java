@@ -22,7 +22,7 @@ public final class VanillaLootTableRegistry {
         Set<String> ids = new HashSet<>();
         try (InputStream stream = VanillaLootTableRegistry.class.getResourceAsStream(RESOURCE_PATH)) {
             if (stream == null) {
-                CustomDropsMod.LOGGER.info("No generated vanilla loot table list bundled (extractVanillaLootTables did not run or found nothing); id validation warnings are disabled this session.");
+                CustomDropsMod.LOGGER.info("No generated vanilla loot table list bundled; id validation warnings are disabled this session.");
                 return ids;
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {

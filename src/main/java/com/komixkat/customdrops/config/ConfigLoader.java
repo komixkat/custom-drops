@@ -17,7 +17,9 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class ConfigLoader {
 
@@ -34,6 +36,8 @@ public final class ConfigLoader {
             return config;
         }
 
+        migrateIfNeededQuietly(configDir);
+
         applyMeta(config, readMeta(configDir));
         config.mobDrops().addAll(readList(configDir.resolve("mob_drops.json"), new TypeToken<List<MobDropEntry>>() {}.getType()));
         config.blockDrops().addAll(readList(configDir.resolve("block_drops.json"), new TypeToken<List<BlockDropEntry>>() {}.getType()));
@@ -43,13 +47,6 @@ public final class ConfigLoader {
         return config;
     }
 
-    /**
-     * Loads the global default config, then overrides it category-by-category with
-     * whatever's present in worldConfigDir. A category is only overridden if its file
-     * actually exists in the world-specific directory; missing categories fall back
-     * to the global default. This lets a world opt into its own drop rules without
-     * needing to duplicate every category if it only wants to change one.
-     */
     public static CustomDropsConfig loadWithWorldOverride(Path globalConfigDir, Path worldConfigDir) {
         CustomDropsConfig config = load(globalConfigDir);
 
@@ -59,6 +56,8 @@ public final class ConfigLoader {
             CustomDropsMod.LOGGER.error("Could not create per-world config directory {}, using global config only", worldConfigDir, e);
             return config;
         }
+
+        migrateIfNeededQuietly(worldConfigDir);
 
         Path worldMeta = worldConfigDir.resolve("meta.json");
         if (Files.exists(worldMeta)) {
@@ -100,15 +99,45 @@ public final class ConfigLoader {
         writeList(configDir.resolve("equipment_overrides.json"), config.equipmentOverrides());
     }
 
+    private static void migrateIfNeededQuietly(Path configDir) {
+        try {
+            ConfigMigrator.migrateIfNeeded(configDir);
+        } catch (Exception e) {
+            CustomDropsMod.LOGGER.error("Failed to migrate config in {}", configDir, e);
+        }
+    }
+
     private static <T> List<T> readList(Path path, Type type) {
         if (!Files.exists(path)) return List.of();
         try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             List<T> result = GSON.fromJson(reader, type);
-            return result != null ? result : List.of();
-        } catch (IOException e) {
+            if (result == null) return List.of();
+            List<T> normalized = new ArrayList<>(result.size());
+            for (T entry : result) {
+                normalized.add(normalizeNulls(entry));
+            }
+            return normalized;
+        } catch (Exception e) {
             CustomDropsMod.LOGGER.error("Failed to read {}, falling back to empty list", path, e);
             return List.of();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T normalizeNulls(T entry) {
+        if (entry instanceof MobDropEntry m && m.items() == null) {
+            return (T) new MobDropEntry(m.targetId(), m.isTag(), m.replaceVanillaTable(), List.of());
+        }
+        if (entry instanceof BlockDropEntry b && b.items() == null) {
+            return (T) new BlockDropEntry(b.targetId(), b.isTag(), b.replaceVanillaTable(), List.of());
+        }
+        if (entry instanceof ChestLootEntry c && c.items() == null) {
+            return (T) new ChestLootEntry(c.targetLootTableId(), c.replaceVanillaTable(), List.of());
+        }
+        if (entry instanceof FishingLootEntry f && f.items() == null) {
+            return (T) new FishingLootEntry(f.targetLootTableId(), f.replaceVanillaTable(), List.of());
+        }
+        return entry;
     }
 
     private static <T> void writeList(Path path, List<T> value) {
@@ -131,11 +160,8 @@ public final class ConfigLoader {
         }
     }
 
-    // Boolean fields use the nullable wrapper type deliberately: Gson's reflection-based
-    // instantiation bypasses field initializers, so a missing JSON field would otherwise
-    // deserialize to false rather than our intended enabled-by-default of true. null means
-    // "not present in this file" and is treated as true here instead.
     private static void applyMeta(CustomDropsConfig config, MetaFile metaFile) {
+        config.setSchemaVersion(metaFile.schemaVersion != null ? metaFile.schemaVersion : 1);
         config.setActivePreset(metaFile.activePreset != null ? metaFile.activePreset : "");
         config.setMobDropsEnabled(metaFile.mobDropsEnabled == null || metaFile.mobDropsEnabled);
         config.setBlockDropsEnabled(metaFile.blockDropsEnabled == null || metaFile.blockDropsEnabled);
@@ -148,6 +174,7 @@ public final class ConfigLoader {
         Path meta = configDir.resolve("meta.json");
         try (Writer writer = Files.newBufferedWriter(meta, StandardCharsets.UTF_8)) {
             MetaFile metaFile = new MetaFile();
+            metaFile.schemaVersion = config.schemaVersion();
             metaFile.activePreset = config.activePreset();
             metaFile.mobDropsEnabled = config.mobDropsEnabled();
             metaFile.blockDropsEnabled = config.blockDropsEnabled();
@@ -161,6 +188,7 @@ public final class ConfigLoader {
     }
 
     private static final class MetaFile {
+        Integer schemaVersion;
         String activePreset;
         Boolean mobDropsEnabled;
         Boolean blockDropsEnabled;

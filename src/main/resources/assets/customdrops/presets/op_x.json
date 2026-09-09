@@ -1,0 +1,1786 @@
+{
+  "presetId": "op_x",
+  "schemaVersion": 2,
+  "displayName": "OP X",
+  "description": "As OP as it gets: a few ores bankroll a full diamond set, bosses drop netherite and spawn eggs, structures hand out elytra and trims.",
+  "targetMinecraftVersion": "26.2",
+  "mobDropsEnabled": true,
+  "blockDropsEnabled": true,
+  "chestLootEnabled": true,
+  "fishingLootEnabled": true,
+  "equipmentOverridesEnabled": false,
+  "mobDrops": [
+    {
+      "targetId": "minecraft:warden",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:sculk_catalyst",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:recovery_compass",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:netherite_helmet",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:warden_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:elder_guardian",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:wet_sponge",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:tide_armor_trim_smithing_template",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:elder_guardian_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wither",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nether_star",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:dragon_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:netherite_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:wither_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:evoker",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:totem_of_undying",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 4,
+          "maxCount": 8,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ravager",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:saddle",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:breeze",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:wind_charge",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:breeze_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:blaze",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:blaze_rod",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ghast",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:ghast_tear",
+          "weight": 3,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:slime",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:slime_ball",
+          "weight": 2,
+          "minCount": 3,
+          "maxCount": 6,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:magma_cube",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:magma_cream",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:phantom",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:phantom_membrane",
+          "weight": 3,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:shulker",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:shulker_shell",
+          "weight": 3,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:enderman",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:ender_pearl",
+          "weight": 3,
+          "minCount": 3,
+          "maxCount": 6,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:guardian",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:prismarine_shard",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:witch",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:creeper",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:creeper_head",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:gunpowder",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wither_skeleton",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:wither_skeleton_skull",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:skeleton",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:skeleton_skull",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:zombie",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:zombie_head",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:camel",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:camel_husk_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:allay",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:allay_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:sniffer",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:sniffer_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:iron_golem",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:iron_golem_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wither",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nether_star",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ender_dragon",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:dragon_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:happy_ghast",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:dried_ghast",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:nautilus",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nautilus_shell",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:illusioner",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:giant",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:bone",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.8,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "blockDrops": [
+    {
+      "targetId": "minecraft:diamond_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 3,
+          "maxCount": 7,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:deepslate_diamond_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 3,
+          "maxCount": 7,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:emerald_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 3,
+          "maxCount": 7,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:gold_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:gold_ingot",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 5,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:iron_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:iron_ingot",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 5,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:copper_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:copper_ingot",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 6,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:coal_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:coal",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 5,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:lapis_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:lapis_lazuli",
+          "weight": 2,
+          "minCount": 4,
+          "maxCount": 10,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:redstone_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:redstone",
+          "weight": 2,
+          "minCount": 4,
+          "maxCount": 10,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:nether_quartz_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:quartz",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 6,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 3
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ancient_debris",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_scrap",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 2
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:glowstone",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:glowstone_dust",
+          "weight": 2,
+          "minCount": 3,
+          "maxCount": 6,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:amethyst_cluster",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:amethyst_shard",
+          "weight": 2,
+          "minCount": 4,
+          "maxCount": 8,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:coal_block",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:diamond_block",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_ingot",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:emerald_block",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_ingot",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:gold_block",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:iron_block",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:gold_ingot",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:netherite_block",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wither_rose",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:wither_rose",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:coal_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:coal",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:deepslate_coal_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:coal",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:iron_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:raw_iron",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:deepslate_iron_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:raw_iron",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:gold_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:raw_gold",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:deepslate_gold_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:raw_gold",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:emerald_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:deepslate_emerald_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:diamond_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:deepslate_diamond_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:nether_quartz_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:quartz",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.7,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ancient_debris",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_scrap",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.8,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:nether_gold_ore",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:gold_nugget",
+          "weight": 3,
+          "minCount": 2,
+          "maxCount": 5,
+          "chance": 0.8,
+          "conditions": [],
+          "enchantments": [],
+          "fortuneBonus": 1
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:gilded_blackstone",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:gold_nugget",
+          "weight": 3,
+          "minCount": 2,
+          "maxCount": 5,
+          "chance": 0.8,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "chestLoot": [
+    {
+      "targetLootTableId": "minecraft:chests/end_city_treasure",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:elytra",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:dragon_breath",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:netherite_pickaxe",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": [
+            {
+              "enchantmentId": "minecraft:fortune",
+              "level": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/ancient_city",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:recovery_compass",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:netherite_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/shipwreck_treasure",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:nautilus_shell",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.8,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/buried_treasure",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:heart_of_the_sea",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.8,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/desert_pyramid",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:enchanted_golden_apple",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/jungle_temple",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 6,
+          "chance": 0.8,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/stronghold_library",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:enchanted_book",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/abandoned_mineshaft",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:golden_apple",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:spawners/trial_chamber/key",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:spawners/ominous/trial_chamber/key",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_scrap",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:spawners/trial_chamber/consumables",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:golden_apple",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:spawners/trial_chamber/items_to_drop_when_ominous",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:echo_shard",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:equipment/trial_chamber",
+      "replaceVanillaTable": false,
+      "items": {
+        "itemId": "minecraft:netherite_sword",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1,
+        "chance": 0.2,
+        "conditions": [],
+        "enchantments": []
+      }
+    },
+    {
+      "targetLootTableId": "minecraft:pots/trial_chambers/corridor",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:archaeology/desert_pyramid",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:archaeology/trail_ruins_rare",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:bolt_armor_trim_smithing_template",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/igloo_chest",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:golden_apple",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/village/village_plains_house",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.1,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:gameplay/fishing",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nautilus_shell",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/nether_bridge",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_scrap",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/bastion_treasure",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/bastion_hoglin_stable",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_sword",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.2,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/bastion_bridge",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:gold_block",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/bastion_other",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_scrap",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.25,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/woodland_mansion",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:enchanted_golden_apple",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/pillager_outpost",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.2,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/ancient_city_ice_box",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:diamond",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/ruined_portal",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:netherite_scrap",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.2,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "fishingLoot": [
+    {
+      "targetLootTableId": "minecraft:gameplay/fishing",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nautilus_shell",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:name_tag",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:enchanted_golden_apple",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.05,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:trident",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.05,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:gameplay/fishing/treasure",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:heart_of_the_sea",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:elytra",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.05,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:gameplay/fishing/fish",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:pufferfish",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "equipmentOverrides": [
+    {
+      "targetEntityId": "minecraft:warden",
+      "isTag": false,
+      "slot": "MAIN_HAND",
+      "dropChance": 2.0
+    },
+    {
+      "targetEntityId": "minecraft:evoker",
+      "isTag": false,
+      "slot": "MAIN_HAND",
+      "dropChance": 2.0
+    },
+    {
+      "targetEntityId": "minecraft:wither",
+      "isTag": false,
+      "slot": "MAIN_HAND",
+      "dropChance": 2.0
+    },
+    {
+      "targetEntityId": "minecraft:piglin_brute",
+      "isTag": false,
+      "slot": "MAIN_HAND",
+      "dropChance": 2.0
+    },
+    {
+      "targetEntityId": "minecraft:wither_skeleton",
+      "isTag": false,
+      "slot": "MAIN_HAND",
+      "dropChance": 2.0
+    }
+  ]
+}

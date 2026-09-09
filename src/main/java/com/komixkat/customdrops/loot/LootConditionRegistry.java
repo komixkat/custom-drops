@@ -2,11 +2,10 @@ package com.komixkat.customdrops.loot;
 
 import com.mojang.serialization.MapCodec;
 import com.komixkat.customdrops.config.schema.LootConditionEntry;
-import net.minecraft.advancements.predicates.EnchantmentPredicate;
-import net.minecraft.advancements.predicates.MinMaxBounds;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -33,6 +32,9 @@ public final class LootConditionRegistry {
                 Float.parseFloat(entry.params().getOrDefault("chance", "1.0"))));
             case SILK_TOUCH -> Optional.of(SilkTouchCondition.builder(false));
             case NO_SILK_TOUCH -> Optional.of(SilkTouchCondition.builder(true));
+            case FORTUNE_LEVEL_AT_LEAST -> Optional.of(FortuneCondition.builder(
+                Integer.parseInt(entry.params().getOrDefault("level", "1"))));
+            case ON_FIRE, ENTITY_ON_FIRE, LOOTING_LEVEL_AT_LEAST -> Optional.empty();
             default -> Optional.empty();
         };
     }
@@ -61,14 +63,50 @@ public final class LootConditionRegistry {
         }
 
         private boolean hasSilkTouch(LootContext context, ItemInstance tool) {
+            return enchantmentLevel(context, tool, Enchantments.SILK_TOUCH) >= 1;
+        }
+
+        private int enchantmentLevel(LootContext context, ItemInstance tool,
+                                     ResourceKey<Enchantment> key) {
+            if (tool == null) return 0;
             ItemEnchantments enchantments = tool.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
-            Optional<Holder.Reference<Enchantment>> silkTouch = context.getLevel()
+            Optional<Holder.Reference<Enchantment>> holder = context.getLevel()
                 .registryAccess()
                 .lookupOrThrow(Registries.ENCHANTMENT)
-                .get(Enchantments.SILK_TOUCH);
-            return silkTouch
-                .map(holder -> new EnchantmentPredicate(holder, MinMaxBounds.Ints.atLeast(1)).containedIn(enchantments))
-                .orElse(false);
+                .get(key);
+            if (holder.isEmpty()) return 0;
+            Holder.Reference<Enchantment> ref = holder.get();
+            return enchantments.getLevel(ref);
+        }
+    }
+
+    private record FortuneCondition(int level) implements LootItemCondition {
+
+        static LootItemCondition.Builder builder(int level) {
+            FortuneCondition condition = new FortuneCondition(level);
+            return () -> condition;
+        }
+
+        @Override
+        public MapCodec<? extends LootItemCondition> codec() {
+            return MatchTool.MAP_CODEC;
+        }
+
+        @Override
+        public Set<ContextKey<?>> getReferencedContextParams() {
+            return Set.of(LootContextParams.TOOL);
+        }
+
+        @Override
+        public boolean test(LootContext context) {
+            ItemInstance tool = context.getOptionalParameter(LootContextParams.TOOL);
+            if (tool == null) return false;
+            ItemEnchantments enchantments = tool.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+            Optional<Holder.Reference<Enchantment>> fortune = context.getLevel()
+                .registryAccess()
+                .lookupOrThrow(Registries.ENCHANTMENT)
+                .get(Enchantments.FORTUNE);
+            return fortune.map(holder -> enchantments.getLevel(holder) >= level).orElse(false);
         }
     }
 }

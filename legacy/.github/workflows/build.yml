@@ -1,0 +1,148 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  discover-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.discover.outputs.targets }}
+    steps:
+      - name: Discover Minecraft versions and their required Java version
+        id: discover
+        run: |
+          curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json > manifest.json
+
+          IDS=$(jq -r '
+              def parts: [splits("\\.")] | map(tonumber);
+              def ge(a; b):
+                (a[0] > b[0]) or
+                (a[0] == b[0] and ((a[1] // 0) > (b[1] // 0))) or
+                (a[0] == b[0] and (a[1] // 0) == (b[1] // 0) and (a[2] // 0) >= (b[2] // 0));
+              .versions[] | select(.type == "release") | select(.id as $i | ($i | parts) as $p | ge($p; "26.2" | parts)) | .id
+          ' manifest.json)
+
+          TARGETS="[]"
+          for id in $IDS; do
+            url=$(jq -r --arg id "$id" '.versions[] | select(.id == $id) | .url' manifest.json)
+            java=$(curl -s "$url" | jq -r '.javaVersion.majorVersion // 21')
+            TARGETS=$(echo "$TARGETS" | jq --arg id "$id" --argjson java "$java" '. + [{minecraft: $id, java: $java}]')
+          done
+
+          echo "Discovered targets: $TARGETS"
+          echo "targets=$(echo "$TARGETS" | jq -c .)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: discover-versions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.discover-versions.outputs.targets) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.target.java }}
+
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 9.5.1
+
+      - name: Build for Minecraft ${{ matrix.target.minecraft }} (Java ${{ matrix.target.java }})
+        run: >
+          gradle build
+          -Pminecraft_version=${{ matrix.target.minecraft }}
+          -Pmod_version=${{ matrix.target.minecraft }}-b${{ github.run_number }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: customdrops-${{ matrix.target.minecraft }}
+          path: build/libs/*.jar
+
+  check-api-drift:
+    needs: discover-versions
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick newest discovered Minecraft version
+        id: newest
+        run: |
+          NEWEST_TARGET=$(echo '${{ needs.discover-versions.outputs.targets }}' | jq -c 'max_by(.minecraft | split(".") | map(tonumber))')
+          echo "version=$(echo "$NEWEST_TARGET" | jq -r '.minecraft')" >> "$GITHUB_OUTPUT"
+          echo "java=$(echo "$NEWEST_TARGET" | jq -r '.java')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.newest.outputs.java }}
+
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 9.5.1
+
+      - name: Decompile Minecraft ${{ steps.newest.outputs.version }} sources
+        run: gradle genSourcesWithVineflower -Pminecraft_version=${{ steps.newest.outputs.version }}
+
+      - name: Extract signatures of tracked classes
+        run: |
+          mkdir -p api-current
+          JAR=$(find . -path "*/loom-cache/minecraftMaven/*" -iname "*-sources.jar" | head -1)
+          if [ -z "$JAR" ]; then
+            echo "Could not locate decompiled sources jar, skipping drift check" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          while read -r f; do
+            [ -z "$f" ] && continue
+            mkdir -p "api-current/$(dirname "$f")"
+            unzip -p "$JAR" "$f" 2>/dev/null | grep -E "^\s*(public|protected|default)\s" > "api-current/$f.sig" || true
+          done < api-baseline/tracked-files.txt
+
+      - name: Diff against stored baseline
+        run: |
+          mkdir -p api-drift-report
+          while read -r f; do
+            [ -z "$f" ] && continue
+            if [ -f "api-baseline/$f.sig" ] && [ -f "api-current/$f.sig" ]; then
+              if ! diff -u "api-baseline/$f.sig" "api-current/$f.sig" > "api-drift-report/$(basename "$f").diff" 2>&1; then
+                {
+                  echo "### API drift detected: $f"
+                  echo '```diff'
+                  cat "api-drift-report/$(basename "$f").diff"
+                  echo '```'
+                } >> "$GITHUB_STEP_SUMMARY"
+              fi
+            elif [ ! -f "api-baseline/$f.sig" ]; then
+              echo "No baseline yet for $f (add one to api-baseline/ once verified)" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done < api-baseline/tracked-files.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-drift-report
+          path: api-drift-report/
+
+  release:
+    if: github.event_name == 'push'
+    needs: [discover-versions, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          files: artifacts/**/*.jar

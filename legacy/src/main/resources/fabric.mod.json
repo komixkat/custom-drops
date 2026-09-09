@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "customdrops",
+  "version": "${version}",
+  "name": "Custom Drops",
+  "description": "Config-driven control over mob, block, chest, fishing, and equipment drops. Vanilla-identical until you opt in.",
+  "authors": ["komixkat"],
+  "contact": {
+    "homepage": "https://github.com/komixkat/custom-drops",
+    "sources": "https://github.com/komixkat/custom-drops"
+  },
+  "license": "LicenseRef-PolyForm-Noncommercial-1.0.0",
+  "icon": "assets/customdrops/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.komixkat.customdrops.CustomDropsMod"],
+    "client": ["com.komixkat.customdrops.ClientCustomDropsMod"],
+    "modmenu": ["com.komixkat.customdrops.config.CustomDropsModMenuIntegration"]
+  },
+  "mixins": ["customdrops.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "fabric-api": "*",
+    "minecraft": ">=${minecraft_version}",
+    "java": ">=25"
+  },
+  "recommends": {
+    "modmenu": "*",
+    "cloth-config2": "*"
+  }
+}

@@ -6,6 +6,5 @@ public record BlockDropEntry(
     String targetId,
     boolean isTag,
     boolean replaceVanillaTable,
-    List<LootItemEntry> pool,
-    List<LootConditionEntry> conditions
+    List<LootItemEntry> items
 ) {}

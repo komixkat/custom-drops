@@ -12,6 +12,7 @@ public record LootConditionEntry(
         SILK_TOUCH,
         NO_SILK_TOUCH,
         LOOTING_LEVEL_AT_LEAST,
+        FORTUNE_LEVEL_AT_LEAST,
         RANDOM_CHANCE,
         ENTITY_ON_FIRE
     }

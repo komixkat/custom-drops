@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.komixkat.customdrops.equipment",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "EquipmentDropMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

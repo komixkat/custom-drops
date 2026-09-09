@@ -15,7 +15,7 @@
   "entrypoints": {
     "main": ["com.komixkat.customdrops.CustomDropsMod"],
     "client": ["com.komixkat.customdrops.ClientCustomDropsMod"],
-    "modmenu": ["com.komixkat.customdrops.config.CustomDropsModMenuIntegration"]
+    "modmenu": ["com.komixkat.customdrops.config.ModMenuIntegration"]
   },
   "mixins": ["customdrops.mixins.json"],
   "depends": {
@@ -24,8 +24,7 @@
     "minecraft": ">=${minecraft_version}",
     "java": ">=25"
   },
-  "recommends": {
-    "modmenu": "*",
-    "cloth-config2": "*"
+  "suggests": {
+    "modmenu": "*"
   }
 }

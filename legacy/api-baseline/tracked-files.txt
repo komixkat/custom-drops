@@ -1,0 +1,4 @@
+net/minecraft/server/permissions/PermissionSet.java
+net/minecraft/world/level/storage/loot/predicates/LootItemCondition.java
+net/minecraft/world/level/storage/loot/predicates/MatchTool.java
+net/minecraft/world/item/ItemInstance.java

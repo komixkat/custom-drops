@@ -11,6 +11,9 @@ import java.util.List;
 
 public final class CustomDropsConfig {
 
+    private static final int CURRENT_SCHEMA_VERSION = 2;
+
+    private int schemaVersion = CURRENT_SCHEMA_VERSION;
     private String activePreset = "";
     private boolean mobDropsEnabled = true;
     private boolean blockDropsEnabled = true;
@@ -23,6 +26,14 @@ public final class CustomDropsConfig {
     private final List<ChestLootEntry> chestLoot = new ArrayList<>();
     private final List<FishingLootEntry> fishingLoot = new ArrayList<>();
     private final List<EquipmentOverrideEntry> equipmentOverrides = new ArrayList<>();
+
+    public int schemaVersion() {
+        return schemaVersion;
+    }
+
+    public void setSchemaVersion(int version) {
+        this.schemaVersion = version;
+    }
 
     public String activePreset() {
         return activePreset;
@@ -98,5 +109,22 @@ public final class CustomDropsConfig {
         chestLoot.clear();
         fishingLoot.clear();
         equipmentOverrides.clear();
+    }
+
+    public void copyInto(CustomDropsConfig target) {
+        if (target == null || target == this) return;
+        target.clearAll();
+        target.setSchemaVersion(schemaVersion);
+        target.setActivePreset(activePreset);
+        target.setMobDropsEnabled(mobDropsEnabled);
+        target.setBlockDropsEnabled(blockDropsEnabled);
+        target.setChestLootEnabled(chestLootEnabled);
+        target.setFishingLootEnabled(fishingLootEnabled);
+        target.setEquipmentOverridesEnabled(equipmentOverridesEnabled);
+        target.mobDrops().addAll(mobDrops);
+        target.blockDrops().addAll(blockDrops);
+        target.chestLoot().addAll(chestLoot);
+        target.fishingLoot().addAll(fishingLoot);
+        target.equipmentOverrides().addAll(equipmentOverrides);
     }
 }

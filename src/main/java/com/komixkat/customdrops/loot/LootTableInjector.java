@@ -5,22 +5,35 @@ import com.komixkat.customdrops.config.CustomDropsConfig;
 import com.komixkat.customdrops.config.schema.BlockDropEntry;
 import com.komixkat.customdrops.config.schema.ChestLootEntry;
 import com.komixkat.customdrops.config.schema.FishingLootEntry;
+import com.komixkat.customdrops.config.schema.EnchantmentEntry;
 import com.komixkat.customdrops.config.schema.LootConditionEntry;
 import com.komixkat.customdrops.config.schema.LootItemEntry;
 import com.komixkat.customdrops.config.schema.MobDropEntry;
 import com.komixkat.customdrops.registry.IdentifierResolver;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
+import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -38,7 +51,7 @@ public final class LootTableInjector {
             Identifier tableId = resourceKey.identifier();
             return findMatch(configSupplier.get(), tableId)
                 .filter(MatchedEntry::replaceVanillaTable)
-                .map(this::buildReplacementTable)
+                .map(match -> buildReplacementTable(match, registries))
                 .orElse(null);
         });
 
@@ -46,7 +59,7 @@ public final class LootTableInjector {
             Identifier tableId = resourceKey.identifier();
             findMatch(configSupplier.get(), tableId)
                 .filter(match -> !match.replaceVanillaTable())
-                .ifPresent(match -> addPool(tableBuilder, match.pool(), match.conditions()));
+                .ifPresent(match -> addPool(tableBuilder, match.pool(), match.conditions(), registries));
         });
     }
 
@@ -69,13 +82,13 @@ public final class LootTableInjector {
         }
         if (config.chestLootEnabled()) {
             for (ChestLootEntry entry : config.chestLoot()) {
-                Optional<MatchedEntry> match = matchDirect(entry.targetLootTableId(), tableId, entry.pool(), entry.conditions(), entry.replaceVanillaTable());
+                Optional<MatchedEntry> match = matchDirect(entry.targetLootTableId(), tableId, entry.items(), entry.replaceVanillaTable());
                 if (match.isPresent()) return match;
             }
         }
         if (config.fishingLootEnabled()) {
             for (FishingLootEntry entry : config.fishingLoot()) {
-                Optional<MatchedEntry> match = matchDirect(entry.targetLootTableId(), tableId, entry.pool(), entry.conditions(), entry.replaceVanillaTable());
+                Optional<MatchedEntry> match = matchDirect(entry.targetLootTableId(), tableId, entry.items(), entry.replaceVanillaTable());
                 if (match.isPresent()) return match;
             }
         }
@@ -86,7 +99,7 @@ public final class LootTableInjector {
         return IdentifierResolver.resolve(entry.targetId()).flatMap(entityId -> {
             Identifier expected = Identifier.fromNamespaceAndPath(entityId.getNamespace(), "entities/" + entityId.getPath());
             return expected.equals(tableId)
-                ? Optional.of(new MatchedEntry(entry.pool(), entry.conditions(), entry.replaceVanillaTable()))
+                ? Optional.of(new MatchedEntry(entry.items(), List.of(), entry.replaceVanillaTable()))
                 : Optional.<MatchedEntry>empty();
         });
     }
@@ -95,32 +108,33 @@ public final class LootTableInjector {
         return IdentifierResolver.resolve(entry.targetId()).flatMap(blockId -> {
             Identifier expected = Identifier.fromNamespaceAndPath(blockId.getNamespace(), "blocks/" + blockId.getPath());
             return expected.equals(tableId)
-                ? Optional.of(new MatchedEntry(entry.pool(), entry.conditions(), entry.replaceVanillaTable()))
+                ? Optional.of(new MatchedEntry(entry.items(), List.of(), entry.replaceVanillaTable()))
                 : Optional.<MatchedEntry>empty();
         });
     }
 
-    private Optional<MatchedEntry> matchDirect(String targetId, Identifier tableId, List<LootItemEntry> pool, List<LootConditionEntry> conditions, boolean replaceVanillaTable) {
+    private Optional<MatchedEntry> matchDirect(String targetId, Identifier tableId, List<LootItemEntry> items, boolean replaceVanillaTable) {
         if (targetId.endsWith("*")) {
             String prefix = targetId.substring(0, targetId.length() - 1);
             return tableId.toString().startsWith(prefix)
-                ? Optional.of(new MatchedEntry(pool, conditions, replaceVanillaTable))
+                ? Optional.of(new MatchedEntry(items, List.of(), replaceVanillaTable))
                 : Optional.<MatchedEntry>empty();
         }
         return IdentifierResolver.resolve(targetId).flatMap(expected ->
             expected.equals(tableId)
-                ? Optional.of(new MatchedEntry(pool, conditions, replaceVanillaTable))
+                ? Optional.of(new MatchedEntry(items, List.of(), replaceVanillaTable))
                 : Optional.<MatchedEntry>empty());
     }
 
-    private LootTable buildReplacementTable(MatchedEntry match) {
+    private LootTable buildReplacementTable(MatchedEntry match, HolderLookup.Provider registries) {
         LootTable.Builder tableBuilder = LootTable.lootTable();
-        addPool(tableBuilder, match.pool(), match.conditions());
+        addPool(tableBuilder, match.pool(), match.conditions(), registries);
         return tableBuilder.build();
     }
 
-    private void addPool(LootTable.Builder tableBuilder, List<LootItemEntry> pool, List<LootConditionEntry> conditions) {
-        if (pool.isEmpty()) return;
+    private void addPool(LootTable.Builder tableBuilder, List<LootItemEntry> pool,
+                         List<LootConditionEntry> poolConditions, HolderLookup.Provider registries) {
+        if (pool == null || pool.isEmpty()) return;
         LootPool.Builder poolBuilder = LootPool.lootPool();
 
         for (LootItemEntry itemEntry : pool) {
@@ -132,25 +146,71 @@ public final class LootTableInjector {
             Item item = BuiltInRegistries.ITEM.getValue(itemId);
             LootItem.Builder entryBuilder = LootItem.lootTableItem(item).setWeight(itemEntry.weight());
 
+            boolean fortune = itemEntry.fortuneBonus() > 0;
             if (itemEntry.minCount() != itemEntry.maxCount()) {
                 entryBuilder.apply(SetItemCountFunction.setCount(
                     UniformGenerator.between(itemEntry.minCount(), itemEntry.maxCount())));
-            } else if (itemEntry.minCount() != 1) {
+            } else if (itemEntry.minCount() != 1 || fortune) {
                 entryBuilder.apply(SetItemCountFunction.setCount(ConstantValue.exactly(itemEntry.minCount())));
+            }
+
+            if (fortune) {
+                fortuneHolder(registries).ifPresent(holder ->
+                    entryBuilder.apply(ApplyBonusCount.addOreBonusCount(holder)));
             }
 
             if (itemEntry.chance() < 1.0f) {
                 entryBuilder.when(LootItemRandomChanceCondition.randomChance(itemEntry.chance()));
             }
 
+            for (LootConditionEntry conditionEntry : itemEntry.conditions()) {
+                LootConditionRegistry.resolve(conditionEntry).ifPresent(entryBuilder::when);
+            }
+
+            applyEnchantments(entryBuilder, itemEntry.enchantments(), registries);
+
             poolBuilder.add(entryBuilder);
         }
 
-        for (LootConditionEntry conditionEntry : conditions) {
+        for (LootConditionEntry conditionEntry : poolConditions) {
             LootConditionRegistry.resolve(conditionEntry).ifPresent(poolBuilder::when);
         }
 
         tableBuilder.withPool(poolBuilder);
+    }
+
+    private Optional<Holder.Reference<Enchantment>> fortuneHolder(HolderLookup.Provider registries) {
+        try {
+            return registries.lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.FORTUNE);
+        } catch (Throwable t) {
+            CustomDropsMod.LOGGER.warn("Could not look up enchantment registry, skipping fortune bonus.", t);
+            return Optional.empty();
+        }
+    }
+
+    private void applyEnchantments(LootItem.Builder entryBuilder, List<EnchantmentEntry> enchantments,
+                                   HolderLookup.Provider registries) {
+        if (enchantments == null || enchantments.isEmpty()) return;
+        HolderLookup.RegistryLookup<Enchantment> enchantRegistry;
+        try {
+            enchantRegistry = registries.lookupOrThrow(Registries.ENCHANTMENT);
+        } catch (Throwable t) {
+            CustomDropsMod.LOGGER.warn("Could not look up enchantment registry, skipping enchantments.", t);
+            return;
+        }
+        for (EnchantmentEntry entry : enchantments) {
+            Identifier id = Identifier.tryParse(entry.enchantmentId());
+            if (id == null) continue;
+            Optional<Holder.Reference<Enchantment>> holder = enchantRegistry.get(
+                ResourceKey.create(Registries.ENCHANTMENT, id));
+            if (holder.isEmpty()) {
+                CustomDropsMod.LOGGER.warn("Skipping unknown enchantment id in config: {}", entry.enchantmentId());
+                continue;
+            }
+            entryBuilder.apply(EnchantWithLevelsFunction.enchantWithLevels(registries,
+                ConstantValue.exactly(entry.level()))
+                .withOptions(HolderSet.direct(holder.get())));
+        }
     }
 
     private record MatchedEntry(List<LootItemEntry> pool, List<LootConditionEntry> conditions, boolean replaceVanillaTable) {}

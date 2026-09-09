@@ -23,7 +23,6 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    implementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
     implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
@@ -42,25 +41,30 @@ def generatedResourcesDir = layout.buildDirectory.dir("generated/customdrops/res
 
 def extractVanillaLootTables = tasks.register('extractVanillaLootTables') {
     group = 'customdrops'
-    description = 'Extracts the real list of vanilla loot table identifiers from the downloaded Minecraft jar, for preset authoring and in-game id validation warnings. Never fails the build; skips with a warning if it cannot find the jar.'
+    description = 'Extracts the real list of vanilla loot table identifiers plus item/block/entity ids from the downloaded Minecraft jars, for preset authoring and in-game id validation warnings. Never fails the build; skips with a warning if it cannot find the jars.'
     outputs.dir(generatedResourcesDir)
     doLast {
         def searchRoots = [
             file("${projectDir}/.gradle/loom-cache/minecraftMaven/net/minecraft"),
             file("${gradle.gradleUserHomeDir}/loom-cache/minecraftMaven/net/minecraft"),
-            file("${gradle.gradleUserHomeDir}/caches/fabric-loom/minecraftMaven/net/minecraft")
+            file("${gradle.gradleUserHomeDir}/caches/fabric-loom/minecraftMaven/net/minecraft"),
+            file("${gradle.gradleUserHomeDir}/caches/fabric-loom/${targetMinecraftVersion}")
         ]
 
         File jarFile = null
+        File clientJarFile = null
         searchRoots.each { root ->
-            if (jarFile == null && root.exists()) {
+            if ((jarFile == null || clientJarFile == null) && root.exists()) {
                 root.eachFileRecurse { candidate ->
-                    if (jarFile == null
-                        && candidate.name.endsWith('.jar')
+                    if (candidate.name.endsWith('.jar')
                         && !candidate.name.contains('sources')
                         && !candidate.name.contains('backup')
                         && candidate.path.contains(targetMinecraftVersion)) {
-                        jarFile = candidate
+                        if (candidate.name ==~ /.*client.*\.jar/) {
+                            if (clientJarFile == null) clientJarFile = candidate
+                        } else if (jarFile == null) {
+                            jarFile = candidate
+                        }
                     }
                 }
             }
@@ -72,20 +76,35 @@ def extractVanillaLootTables = tasks.register('extractVanillaLootTables') {
         def outputFile = new File(targetDir, 'vanilla_loot_tables.txt')
 
         if (jarFile == null) {
-            logger.warn("customdrops: could not locate the downloaded Minecraft ${targetMinecraftVersion} jar under any known loom-cache path; skipping real loot table extraction. Bundled reference list in EDITABLE_DROPS.md remains inferred, not verified, until this succeeds.")
+            logger.warn("customdrops: could not locate the downloaded Minecraft ${targetMinecraftVersion} jar under any known loom-cache path; skipping real loot table extraction. Bundled reference list remains inferred, not verified, until this succeeds.")
             outputFile.text = ''
             return
         }
 
         def identifiers = new TreeSet<String>()
+        def lootTableBytes = new LinkedHashMap<String, byte[]>()
+        def lootTablesBytes = new LinkedHashMap<String, byte[]>()
         def zip = new java.util.zip.ZipFile(jarFile)
         try {
             zip.entries().each { entry ->
                 def name = entry.name
-                if (!entry.directory && name.toLowerCase().contains('loot_table') && name.endsWith('.json')) {
-                    def matcher = (name =~ /data\/([^\/]+)\/loot_tables?\/(.+)\.json$/)
+                if (!entry.directory && name.endsWith('.json')) {
+                    def matcher = (name =~ /data\/([^\/]+)\/loot_table\/(.+)\.json$/)
                     if (matcher.find()) {
-                        identifiers.add("${matcher.group(1)}:${matcher.group(2)}")
+                        def key = "${matcher.group(1)}:${matcher.group(2)}"
+                        identifiers.add(key)
+                        lootTableBytes.put(key, zip.getInputStream(entry).withCloseable { it.bytes })
+                    }
+                }
+            }
+            zip.entries().each { entry ->
+                def name = entry.name
+                if (!entry.directory && name.endsWith('.json')) {
+                    def matcher = (name =~ /data\/([^\/]+)\/loot_tables\/(.+)\.json$/)
+                    if (matcher.find()) {
+                        def key = "${matcher.group(1)}:${matcher.group(2)}"
+                        identifiers.add(key)
+                        lootTablesBytes.put(key, zip.getInputStream(entry).withCloseable { it.bytes })
                     }
                 }
             }
@@ -95,7 +114,59 @@ def extractVanillaLootTables = tasks.register('extractVanillaLootTables') {
 
         outputFile.text = identifiers.join('\n')
         logger.lifecycle("customdrops: extracted ${identifiers.size()} real vanilla loot table identifiers from ${jarFile.name} into ${outputFile}")
+
+        lootTablesBytes.each { key, bytes ->
+            lootTableBytes.putIfAbsent(key, bytes)
+        }
+        def lootOutDir = new File(targetDir, 'loot_tables')
+        lootTableBytes.each { key, bytes ->
+            def colon = key.indexOf(':')
+            def ns = key.substring(0, colon)
+            def path = key.substring(colon + 1)
+            def out = new File(lootOutDir, ns + '/' + path + '.json')
+            out.parentFile.mkdirs()
+            new java.io.FileOutputStream(out).withCloseable { fos -> fos.write(bytes) }
+        }
+        logger.lifecycle("customdrops: bundled ${lootTableBytes.size()} vanilla loot table JSONs into ${lootOutDir}")
+
+        extractRegistryIds(clientJarFile == null ? jarFile : clientJarFile, targetDir)
     }
+}
+
+private void extractRegistryIds(File langJar, File targetDir) {
+    def items = new TreeSet<String>()
+    def blocks = new TreeSet<String>()
+    def entities = new TreeSet<String>()
+
+    def langBytes = null
+    def langJarHandle = new java.util.zip.ZipFile(langJar)
+    try {
+        def entry = langJarHandle.getEntry('assets/minecraft/lang/en_us.json')
+        if (entry != null) {
+            langBytes = langJarHandle.getInputStream(entry).withCloseable { it.bytes }
+        }
+    } finally {
+        langJarHandle.close()
+    }
+
+    if (langBytes == null) {
+        logger.warn("customdrops: no en_us.json found in ${langJar.name}; registry id lists not generated (autocomplete fallback stays empty).")
+        return
+    }
+    def root = new groovy.json.JsonSlurper().parseText(new String(langBytes, java.nio.charset.StandardCharsets.UTF_8))
+    root.each { key, value ->
+        if (key.startsWith('item.minecraft.')) {
+            items.add('minecraft:' + key.substring('item.minecraft.'.length()))
+        } else if (key.startsWith('block.minecraft.')) {
+            blocks.add('minecraft:' + key.substring('block.minecraft.'.length()))
+        } else if (key.startsWith('entity.minecraft.')) {
+            entities.add('minecraft:' + key.substring('entity.minecraft.'.length()))
+        }
+    }
+    new File(targetDir, 'vanilla_item_ids.txt').text = items.join('\n')
+    new File(targetDir, 'vanilla_block_ids.txt').text = blocks.join('\n')
+    new File(targetDir, 'vanilla_entity_ids.txt').text = entities.join('\n')
+    logger.lifecycle("customdrops: extracted ${items.size()} item ids, ${blocks.size()} block ids, ${entities.size()} entity ids from ${langJar.name} en_us.json for autocomplete fallback.")
 }
 
 sourceSets {

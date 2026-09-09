@@ -13,7 +13,7 @@ public final class PresetVersionValidator {
     }
 
     public static void validate(String presetId, String presetVersion, String runningVersion) {
-        if (!presetVersion.equals(runningVersion)) {
+        if (!presetVersion.startsWith(runningVersion.split("\\.")[0] + "." + runningVersion.split("\\.")[1])) {
             throw new PresetVersionMismatchException(presetId, presetVersion, runningVersion);
         }
     }

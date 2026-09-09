@@ -12,8 +12,7 @@ public final class IdentifierResolver {
         if (rawId == null || rawId.isBlank() || rawId.startsWith("#")) {
             return Optional.empty();
         }
-        return Identifier.tryParse(rawId) != null
-            ? Optional.of(Identifier.parse(rawId))
-            : Optional.empty();
+        Identifier parsed = Identifier.tryParse(rawId);
+        return parsed != null ? Optional.of(parsed) : Optional.empty();
     }
 }

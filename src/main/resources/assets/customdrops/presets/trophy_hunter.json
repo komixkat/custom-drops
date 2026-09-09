@@ -1,0 +1,1924 @@
+{
+  "presetId": "trophy_hunter",
+  "schemaVersion": 2,
+  "displayName": "Trophy Hunter",
+  "description": "Every mob drops its head as a rare player-kill trophy, plus keepsakes (nautilus shells, ears, scales, membranes). Perfect for a trophy room.",
+  "targetMinecraftVersion": "26.2",
+  "mobDropsEnabled": true,
+  "blockDropsEnabled": true,
+  "chestLootEnabled": true,
+  "fishingLootEnabled": true,
+  "equipmentOverridesEnabled": false,
+  "mobDrops": [
+    {
+      "targetId": "minecraft:zombie",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:zombie_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.09,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:zombie_villager",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:zombie_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.12,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:husk",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:zombie_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.12,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:sand",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.45,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:drowned",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:zombie_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:nautilus_shell",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.12,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:skeleton",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:skeleton_skull",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.09,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:stray",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:skeleton_skull",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.12,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:ice",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.35,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:bogged",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:skeleton_skull",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:creeper",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:creeper_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wither_skeleton",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:wither_skeleton_skull",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:piglin",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:piglin_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.08,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:gold_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.12,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:piglin_brute",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:piglin_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.12,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:netherite_scrap",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.04,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:zombified_piglin",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:gold_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.15,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:hoglin",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:porkchop",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:zoglin",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:rotten_flesh",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ghast",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:ghast_tear",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.22,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:fire_charge",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.18,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:blaze",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:blaze_rod",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.35,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:magma_cube",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:magma_cream",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:slime",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:slime_ball",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:spider",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:string",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:cave_spider",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:string",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:enderman",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:ender_pearl",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:chorus_fruit",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.15,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:phantom",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:phantom_membrane",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:witch",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:glowstone_dust",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:redstone",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:gunpowder",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:spider_eye",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:shulker",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:shulker_shell",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.35,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:evoker",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.4,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:vindicator",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ravager",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:warden",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:sculk_catalyst",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.25,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:recovery_compass",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:guardian",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:prismarine_shard",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:elder_guardian",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:prismarine_shard",
+          "weight": 3,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:wet_sponge",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:tide_armor_trim_smithing_template",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.03,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:pillager",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.2,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:vex",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:iron_ingot",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.2,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:snow_golem",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:snowball",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 4,
+          "chance": 0.6,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:iron_golem",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:iron_ingot",
+          "weight": 3,
+          "minCount": 1,
+          "maxCount": 3,
+          "chance": 0.5,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wolf",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:bone",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.25,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:fox",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:sweet_berries",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:cat",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:string",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.2,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:bee",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:honeycomb",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:panda",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:bamboo",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:polar_bear",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:cod",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:goat",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:mutton",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:dolphin",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:cod",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:squid",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:ink_sac",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:glow_squid",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:glow_ink_sac",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:turtle",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:turtle_scute",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.15,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:parrot",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:feather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.35,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:endermite",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:ender_pearl",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.15,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:silverfish",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:gravel",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.2,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:bat",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:phantom_membrane",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:allay",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:echo_shard",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.05,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:bee",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:honey_bottle",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:chicken",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:egg",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:cow",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:sheep",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:mutton",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:pig",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:porkchop",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:rabbit",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:rabbit_hide",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wither",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nether_star",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ender_dragon",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:dragon_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.05,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:happy_ghast",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:dried_ghast",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.12,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:nautilus",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nautilus_shell",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.2,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:copper_golem",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:copper_golem_statue",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.08,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:creaking",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:creaking_heart",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:breeze",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:wind_charge",
+          "weight": 2,
+          "minCount": 2,
+          "maxCount": 4,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:armadillo",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:turtle_scute",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:sniffer",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:sniffer_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.05,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:ocelot",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:cod",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:salmon",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:salmon",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:cod",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:cod",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:pufferfish",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:pufferfish",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:tropical_fish",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:tropical_fish",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:strider",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:string",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:mooshroom",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:mushroom_stew",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:villager",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.15,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wandering_trader",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        },
+        {
+          "itemId": "minecraft:lead",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.3,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:trader_llama",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:llama",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:horse",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:donkey",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:mule",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:skeleton_horse",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:bone",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:zombie_horse",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:rotten_flesh",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:giant",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:bone",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.5,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:illusioner",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:emerald",
+          "weight": 2,
+          "minCount": 1,
+          "maxCount": 2,
+          "chance": 0.4,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:armor_stand",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:shield",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.05,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:sulfur_cube",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:sulfur_spike",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:camel",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:leather",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.4,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:player",
+      "isTag": false,
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:player_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "blockDrops": [
+    {
+      "targetId": "minecraft:player_head",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:player_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:dragon_head",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:dragon_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:skeleton_skull",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:skeleton_skull",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:zombie_head",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:zombie_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:creeper_head",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:creeper_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:wither_skeleton_skull",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:wither_skeleton_skull",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetId": "minecraft:piglin_head",
+      "isTag": false,
+      "replaceVanillaTable": true,
+      "items": [
+        {
+          "itemId": "minecraft:piglin_head",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 1.0,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "chestLoot": [
+    {
+      "targetLootTableId": "minecraft:chests/ancient_city",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:warden_spawn_egg",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/end_city_treasure",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:elytra",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.15,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    },
+    {
+      "targetLootTableId": "minecraft:chests/desert_pyramid",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:totem_of_undying",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.02,
+          "conditions": [
+            {
+              "type": "KILLED_BY_PLAYER",
+              "params": {}
+            }
+          ],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "fishingLoot": [
+    {
+      "targetLootTableId": "minecraft:gameplay/fishing",
+      "replaceVanillaTable": false,
+      "items": [
+        {
+          "itemId": "minecraft:nautilus_shell",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1,
+          "chance": 0.1,
+          "conditions": [],
+          "enchantments": []
+        }
+      ]
+    }
+  ],
+  "equipmentOverrides": []
+}
