@@ -20,8 +20,7 @@ jobs:
       - name: Discover Minecraft releases and resolve per-version build inputs
         id: discover
         run: |
-          curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json -o manifest.json
-          python3 - > targets.json <<'PY'
+          python3 - <<'PY'
           import json, re, urllib.request
           from xml.etree import ElementTree
 
@@ -68,7 +67,8 @@ jobs:
               })
               print(f'resolved {mc}: java={java} loader={loader} fabric_api={fabric_api}', flush=True)
 
-          print(json.dumps(targets))
+          with open('targets.json', 'w') as out:
+              json.dump(targets, out)
           PY
           cat targets.json
           echo "targets=$(cat targets.json)" >> "$GITHUB_OUTPUT"
