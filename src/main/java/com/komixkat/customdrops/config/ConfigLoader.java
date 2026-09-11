@@ -162,7 +162,6 @@ public final class ConfigLoader {
 
     private static void applyMeta(CustomDropsConfig config, MetaFile metaFile) {
         config.setSchemaVersion(metaFile.schemaVersion != null ? metaFile.schemaVersion : 1);
-        config.setActivePreset(metaFile.activePreset != null ? metaFile.activePreset : "");
         config.setMobDropsEnabled(metaFile.mobDropsEnabled == null || metaFile.mobDropsEnabled);
         config.setBlockDropsEnabled(metaFile.blockDropsEnabled == null || metaFile.blockDropsEnabled);
         config.setChestLootEnabled(metaFile.chestLootEnabled == null || metaFile.chestLootEnabled);
@@ -175,7 +174,6 @@ public final class ConfigLoader {
         try (Writer writer = Files.newBufferedWriter(meta, StandardCharsets.UTF_8)) {
             MetaFile metaFile = new MetaFile();
             metaFile.schemaVersion = config.schemaVersion();
-            metaFile.activePreset = config.activePreset();
             metaFile.mobDropsEnabled = config.mobDropsEnabled();
             metaFile.blockDropsEnabled = config.blockDropsEnabled();
             metaFile.chestLootEnabled = config.chestLootEnabled();
@@ -189,7 +187,6 @@ public final class ConfigLoader {
 
     private static final class MetaFile {
         Integer schemaVersion;
-        String activePreset;
         Boolean mobDropsEnabled;
         Boolean blockDropsEnabled;
         Boolean chestLootEnabled;

@@ -110,6 +110,9 @@ public final class EntryListWidget {
             if (button == 0) {
                 com.komixkat.customdrops.client.gui.UiSfx.click();
                 rows.get(rowIdx).onClick();
+            } else if (button == 1) {
+                com.komixkat.customdrops.client.gui.UiSfx.click();
+                rows.get(rowIdx).onRightClick();
             }
             return true;
         }
@@ -181,6 +184,8 @@ public final class EntryListWidget {
         public abstract void render(GuiGraphicsExtractor guiGraphics, int x, int y, int width);
 
         public void onClick() {}
+
+        public void onRightClick() {}
 
         public boolean isSection() {
             return false;

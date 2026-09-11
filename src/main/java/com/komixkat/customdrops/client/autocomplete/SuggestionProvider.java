@@ -8,9 +8,13 @@ import java.util.Map;
 public final class SuggestionProvider {
 
     private final List<String> entries = new ArrayList<>();
-    private final Map<String, Integer> popularity = new LinkedHashMap<>();
+    private static final Map<String, Integer> popularity = new LinkedHashMap<>();
     private final Trie trie = new Trie();
     private final NGramIndex ngramIndex = new NGramIndex();
+
+    static {
+        TagPopularity.loadInto(popularity);
+    }
 
     public void rebuild(List<String> allEntries) {
         trie.clear();
@@ -26,16 +30,28 @@ public final class SuggestionProvider {
 
     public void incrementPopularity(String id) {
         popularity.merge(id, 1, Integer::sum);
+        if (id.startsWith("#")) {
+            TagPopularity.add(id);
+        }
     }
 
     public List<Suggestion> getSuggestions(String query, int maxResults) {
         if (query == null || query.isBlank()) return List.of();
 
         String lower = query.toLowerCase();
+        boolean wasTagPrefix = lower.startsWith("#");
+        if (lower.startsWith("#")) {
+            lower = lower.substring(1);
+        }
         if (lower.endsWith("*")) {
             lower = lower.substring(0, lower.length() - 1).trim();
         }
-        if (lower.isEmpty()) return List.of();
+        if (lower.isEmpty()) {
+            return wasTagPrefix ? listAllTags(maxResults) : List.of();
+        }
+        if (wasTagPrefix) {
+            return searchTagsOnly(lower, maxResults);
+        }
 
         List<Integer> prefixMatches = trie.searchByPrefix(lower, maxResults * 2);
         List<Integer> segmentMatches = segmentSearch(lower, maxResults * 2);
@@ -70,6 +86,58 @@ public final class SuggestionProvider {
             }
         }
         return results;
+    }
+
+    private List<Suggestion> searchTagsOnly(String query, int maxResults) {
+        List<Map.Entry<Integer, Double>> ranked = new ArrayList<>();
+        for (int i = 0; i < entries.size(); i++) {
+            String id = entries.get(i);
+            if (!id.startsWith("#")) continue;
+            String segment = lastSegment(id);
+            double score;
+            if (segment.startsWith(query)) {
+                score = 100.0;
+            } else if (segment.contains(query)) {
+                score = 90.0;
+            } else if (id.toLowerCase().contains(query)) {
+                score = 80.0;
+            } else {
+                continue;
+            }
+            ranked.add(Map.entry(i, score));
+        }
+        ranked.sort((a, b) -> {
+            int byScore = Double.compare(b.getValue(), a.getValue());
+            if (byScore != 0) return byScore;
+            int pa = popularity.getOrDefault(entries.get(a.getKey()), 0);
+            int pb = popularity.getOrDefault(entries.get(b.getKey()), 0);
+            if (pa != pb) return Integer.compare(pb, pa);
+            return entries.get(a.getKey()).compareTo(entries.get(b.getKey()));
+        });
+        List<Suggestion> out = new ArrayList<>();
+        int count = 0;
+        for (Map.Entry<Integer, Double> e : ranked) {
+            if (count >= maxResults) break;
+            String id = entries.get(e.getKey());
+            out.add(new Suggestion(id, extractNamespace(id), popularity.getOrDefault(id, 0), e.getValue()));
+            count++;
+        }
+        return out;
+    }
+
+    private List<Suggestion> listAllTags(int maxResults) {
+        List<Suggestion> out = new ArrayList<>();
+        for (int i = 0; i < entries.size(); i++) {
+            String id = entries.get(i);
+            if (id.startsWith("#")) {
+                out.add(new Suggestion(id, extractNamespace(id), popularity.getOrDefault(id, 0), 0.0));
+            }
+        }
+        out.sort((a, b) -> {
+            int byPop = Integer.compare(b.popularity(), a.popularity());
+            return byPop != 0 ? byPop : a.id().compareTo(b.id());
+        });
+        return out.stream().limit(maxResults).toList();
     }
 
     private void score(Map<Integer, Double> combined, List<Integer> matches, double tierDecay, double base) {

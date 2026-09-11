@@ -36,9 +36,11 @@ public final class RootScreen extends SplitPaneScreen {
         navWidget.addCategory("Tools");
         navWidget.addEntry("Tools", "Browse Loot Tables", () ->
             this.minecraft.gui.setScreen(new BrowseScreen(this)));
+        navWidget.addEntry("Tools", "Browse Tags", () ->
+            this.minecraft.gui.setScreen(new TagsBrowserScreen(this)));
         navWidget.addEntry("Tools", "Default Values", () ->
             this.minecraft.gui.setScreen(new DefaultValuesScreen(this)));
-        navWidget.addEntry("Tools", "Export / Import", () ->
+        navWidget.addEntry("Tools", "Codes", () ->
             this.minecraft.gui.setScreen(new ExportImportScreen(this)));
         navWidget.addEntry("Tools", "Server Config", () ->
             this.minecraft.gui.setScreen(new ServerConfigScreen(this)));
@@ -46,10 +48,14 @@ public final class RootScreen extends SplitPaneScreen {
         navWidget.addCategory("Configuration");
         navWidget.addEntry("Configuration", "Configs", () ->
             this.minecraft.gui.setScreen(new ConfigsScreen(this)));
-        navWidget.addEntry("Configuration", "Presets", () ->
-            this.minecraft.gui.setScreen(new PresetsScreen(this)));
+        navWidget.addEntry("Configuration", "Imports", () ->
+            this.minecraft.gui.setScreen(new ImportsScreen(this)));
         navWidget.addEntry("Configuration", "Settings", () ->
             this.minecraft.gui.setScreen(new SettingsScreen(this)));
+
+        navWidget.addCategory("Chaos");
+        navWidget.addEntry("Chaos", "Generate a Lootstorm", () ->
+            this.minecraft.gui.setScreen(new ChaosScreen(this)));
     }
 
     @Override
@@ -59,8 +65,7 @@ public final class RootScreen extends SplitPaneScreen {
     protected void renderContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
         guiGraphics.text(font, "Custom Drops", rightPanelX + 8, contentY + 8, 0xFFE0E0E0, false);
         guiGraphics.text(font, "Each category configures one kind of drop.", rightPanelX + 8, contentY + 28, 0xFF888888, false);
-        guiGraphics.text(font, "Tools lets you browse vanilla loot tables, view", rightPanelX + 8, contentY + 42, 0xFF888888, false);
-        guiGraphics.text(font, "defaults, and move configs around. Presets and", rightPanelX + 8, contentY + 52, 0xFF888888, false);
-        guiGraphics.text(font, "Settings handle whole-config options.", rightPanelX + 8, contentY + 62, 0xFF888888, false);
+        guiGraphics.text(font, "Browse vanilla loot tables, see the saves,", rightPanelX + 8, contentY + 42, 0xFF888888, false);
+        guiGraphics.text(font, "and move configs between worlds with codes.", rightPanelX + 8, contentY + 52, 0xFF888888, false);
     }
 }

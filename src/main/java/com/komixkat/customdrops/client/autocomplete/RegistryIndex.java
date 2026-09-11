@@ -40,15 +40,17 @@ public final class RegistryIndex {
     }
 
     public List<SuggestionProvider.Suggestion> search(String query, java.util.Set<String> kinds, int maxResults) {
+        boolean tagsOnly = query != null && query.startsWith("#");
+        boolean wide = tagsOnly || (kinds != null && !kinds.isEmpty());
         List<SuggestionProvider.Suggestion> all = suggestionProvider.getSuggestions(query,
-            kinds == null || kinds.isEmpty() ? maxResults : Math.max(maxResults * 3, maxResults));
-        if (kinds == null || kinds.isEmpty()) return all;
+            wide ? Math.max(maxResults * 3, maxResults) : maxResults);
+        if (!wide) return all;
         List<SuggestionProvider.Suggestion> out = new java.util.ArrayList<>();
         for (SuggestionProvider.Suggestion s : all) {
-            if (matchesKinds(s.id(), kinds)) {
-                out.add(s);
-                if (out.size() >= maxResults) break;
-            }
+            if (tagsOnly && !s.id().startsWith("#")) continue;
+            if (kinds != null && !kinds.isEmpty() && !matchesKinds(s.id(), kinds)) continue;
+            out.add(s);
+            if (out.size() >= maxResults) break;
         }
         return out;
     }

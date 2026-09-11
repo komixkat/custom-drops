@@ -21,7 +21,6 @@ public final class ServerConfigCache {
     public static void reset() {
         synchronized (MIRROR) {
             CustomDropsMod.config().copyInto(MIRROR);
-            MIRROR.setActivePreset("");
         }
         canEdit = false;
         connected = false;
@@ -62,6 +61,14 @@ public final class ServerConfigCache {
         } catch (Throwable t) {
             CustomDropsMod.LOGGER.warn("Could not send config edit to server", t);
         }
+    }
+
+    public static void pushConfig(CustomDropsConfig config) {
+        if (!canEdit || !connected || config == null) return;
+        synchronized (MIRROR) {
+            config.copyInto(MIRROR);
+        }
+        sendToServer();
     }
 
     public static CustomDropsConfig config() {

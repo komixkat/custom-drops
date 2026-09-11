@@ -15,9 +15,13 @@ public final class ClientCustomDropsMod implements ClientModInitializer {
         ConfigSyncHandler.register();
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ServerConfigCache.reset());
 
-        ClientPlayNetworking.registerGlobalReceiver(OpenGuiPayload.TYPE, (payload, context) ->
-            context.client().execute(() ->
-                context.client().gui.setScreen(new RootScreen(null))));
+        try {
+            ClientPlayNetworking.registerGlobalReceiver(OpenGuiPayload.TYPE,
+                (payload, context) -> context.client().execute(() ->
+                    context.client().gui.setScreen(new RootScreen(null))));
+        } catch (Throwable t) {
+            CustomDropsMod.LOGGER.warn("Could not register open-gui handler", t);
+        }
     }
 
     public static boolean isConnectedToCustomDropsServer() {

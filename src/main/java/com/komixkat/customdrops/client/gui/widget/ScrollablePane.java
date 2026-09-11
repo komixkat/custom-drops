@@ -113,13 +113,14 @@ public final class ScrollablePane {
         return widget;
     }
 
-    public void addCheckbox(int x, int y, String label, boolean selected, Consumer<Boolean> onChange) {
+    public Checkbox addCheckbox(int x, int y, String label, boolean selected, Consumer<Boolean> onChange) {
         Checkbox cb = Checkbox.builder(Component.literal(label), owner.font())
             .selected(selected)
             .onValueChange((box, val) -> onChange.accept(val))
             .pos(x, y)
             .build();
         register(cb, x, y, 0, 0);
+        return cb;
     }
 
     public EditBox addEditBox(int x, int y, int w, String value, String hint, Consumer<String> onChange) {

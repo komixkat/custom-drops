@@ -78,8 +78,20 @@ public abstract class LootRuleScreen<T> extends SplitPaneScreen {
             segments.add(title);
             segments.addAll(com.komixkat.customdrops.client.gui.widget.NavigationWidget
                 .segments(host.targetOf(entry), host.isTagOf(entry)));
-            navWidget.addEntryPath(segments, label, () -> openEntry(index));
-            navWidget.markEntryWarn(label, warnOf(host, entry));
+            StringBuilder searchText = new StringBuilder(label);
+            try {
+                var items = host.itemsOf(entry);
+                if (items != null) {
+                    for (com.komixkat.customdrops.config.schema.LootItemEntry it : items) {
+                        if (it != null && it.itemId() != null && !it.itemId().isBlank()) {
+                            searchText.append(' ').append(it.itemId());
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            navWidget.addEntryPath(segments, label, searchText.toString(), () -> openEntry(index));
+            navWidget.markEntryWarn(segments, label, warnOf(host, entry));
         }
 
         if (!readOnly) {
@@ -198,7 +210,7 @@ public abstract class LootRuleScreen<T> extends SplitPaneScreen {
         }
         var font = net.minecraft.client.Minecraft.getInstance().font;
         guiGraphics.text(font, categoryTitle(), rightPanelX + 8, contentY + 16, 0xFFE0E0E0, false);
-        guiGraphics.text(font, "This screen stores your " + singularLabel().toLowerCase() + " drop rules.",
+        guiGraphics.text(font, "Each " + singularLabel().toLowerCase() + " targets one source.",
             rightPanelX + 8, contentY + 36, 0xFF888888, false);
         guiGraphics.text(font, "Pick a rule on the left to edit it, or press \"New " + singularLabel() + "\".",
             rightPanelX + 8, contentY + 50, 0xFF888888, false);

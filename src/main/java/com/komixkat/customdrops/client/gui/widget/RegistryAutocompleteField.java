@@ -25,6 +25,7 @@ public final class RegistryAutocompleteField extends EditBox {
     private Set<String> suggestionKinds = Set.of();
     private int popupClampTop = 0;
     private int popupClampBottom = Integer.MAX_VALUE;
+    private String currentQuery = "";
 
     public RegistryAutocompleteField(Screen parent, int x, int y, int width, int height,
                                      Component narrationMessage, RegistryIndex registryIndex) {
@@ -85,10 +86,20 @@ public final class RegistryAutocompleteField extends EditBox {
     }
 
     private void refreshSuggestions(String text) {
+        currentQuery = text == null ? "" : text;
         List<SuggestionProvider.Suggestion> suggestions = registryIndex.search(text,
             suggestionKinds.isEmpty() ? null : suggestionKinds, 20);
         if (suggestions.isEmpty()) {
-            hidePopup();
+            if (text.startsWith("#") && !suggestionKinds.isEmpty()) {
+                if (suggestionPopup == null) {
+                    suggestionPopup = new SuggestionPopup();
+                }
+                suggestionPopup.setHint("No " + String.join(", ", suggestionKinds) + " tag matches \"" + text + "\"");
+                popupVisible = true;
+                selectedSuggestion = -1;
+            } else {
+                hidePopup();
+            }
             return;
         }
         if (suggestionPopup == null) {
@@ -177,5 +188,9 @@ public final class RegistryAutocompleteField extends EditBox {
 
     public boolean isPopupVisible() {
         return popupVisible;
+    }
+
+    public String currentQuery() {
+        return currentQuery;
     }
 }

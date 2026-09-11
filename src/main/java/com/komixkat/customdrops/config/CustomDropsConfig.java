@@ -14,7 +14,6 @@ public final class CustomDropsConfig {
     private static final int CURRENT_SCHEMA_VERSION = 2;
 
     private int schemaVersion = CURRENT_SCHEMA_VERSION;
-    private String activePreset = "";
     private boolean mobDropsEnabled = true;
     private boolean blockDropsEnabled = true;
     private boolean chestLootEnabled = true;
@@ -33,14 +32,6 @@ public final class CustomDropsConfig {
 
     public void setSchemaVersion(int version) {
         this.schemaVersion = version;
-    }
-
-    public String activePreset() {
-        return activePreset;
-    }
-
-    public void setActivePreset(String presetId) {
-        this.activePreset = presetId;
     }
 
     public boolean mobDropsEnabled() {
@@ -115,7 +106,6 @@ public final class CustomDropsConfig {
         if (target == null || target == this) return;
         target.clearAll();
         target.setSchemaVersion(schemaVersion);
-        target.setActivePreset(activePreset);
         target.setMobDropsEnabled(mobDropsEnabled);
         target.setBlockDropsEnabled(blockDropsEnabled);
         target.setChestLootEnabled(chestLootEnabled);

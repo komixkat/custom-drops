@@ -61,6 +61,9 @@ public final class DefaultValuesScreen extends SplitPaneScreen {
         addExample("entities/shulker");
         addExample("gameplay/fishing");
         addExample("blocks/stone");
+        navWidget.addCategory("Tags");
+        navWidget.addEntry("Tags", "Tags list\u2026", () ->
+            this.minecraft.gui.setScreen(new TagsBrowserScreen(this)));
     }
 
     private void addExample(String id) {

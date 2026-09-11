@@ -18,15 +18,18 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
-import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.SetEnchantmentsFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
@@ -49,7 +52,7 @@ public final class LootTableInjector {
     public void register() {
         LootTableEvents.REPLACE.register((resourceKey, original, source, registries) -> {
             Identifier tableId = resourceKey.identifier();
-            return findMatch(configSupplier.get(), tableId)
+            return findMatch(configSupplier.get(), tableId, registries)
                 .filter(MatchedEntry::replaceVanillaTable)
                 .map(match -> buildReplacementTable(match, registries))
                 .orElse(null);
@@ -57,7 +60,7 @@ public final class LootTableInjector {
 
         LootTableEvents.MODIFY.register((resourceKey, tableBuilder, source, registries) -> {
             Identifier tableId = resourceKey.identifier();
-            findMatch(configSupplier.get(), tableId)
+            findMatch(configSupplier.get(), tableId, registries)
                 .filter(match -> !match.replaceVanillaTable())
                 .ifPresent(match -> addPool(tableBuilder, match.pool(), match.conditions(), registries));
         });
@@ -67,16 +70,16 @@ public final class LootTableInjector {
         CustomDropsMod.LOGGER.info("Loot table config updated; call a server resource reload to apply it to loaded tables.");
     }
 
-    private Optional<MatchedEntry> findMatch(CustomDropsConfig config, Identifier tableId) {
+    private Optional<MatchedEntry> findMatch(CustomDropsConfig config, Identifier tableId, HolderLookup.Provider registries) {
         if (config.mobDropsEnabled()) {
             for (MobDropEntry entry : config.mobDrops()) {
-                Optional<MatchedEntry> match = matchMob(entry, tableId);
+                Optional<MatchedEntry> match = matchMob(entry, tableId, registries);
                 if (match.isPresent()) return match;
             }
         }
         if (config.blockDropsEnabled()) {
             for (BlockDropEntry entry : config.blockDrops()) {
-                Optional<MatchedEntry> match = matchBlock(entry, tableId);
+                Optional<MatchedEntry> match = matchBlock(entry, tableId, registries);
                 if (match.isPresent()) return match;
             }
         }
@@ -95,7 +98,13 @@ public final class LootTableInjector {
         return Optional.empty();
     }
 
-    private Optional<MatchedEntry> matchMob(MobDropEntry entry, Identifier tableId) {
+    private Optional<MatchedEntry> matchMob(MobDropEntry entry, Identifier tableId, HolderLookup.Provider registries) {
+        if (entry.isTag()) {
+            Identifier tagId = Identifier.tryParse(entry.targetId());
+            if (tagId == null) return Optional.empty();
+            return mobInTag(TagKey.create(Registries.ENTITY_TYPE, tagId), tableId, registries,
+                entry.items(), entry.replaceVanillaTable());
+        }
         return IdentifierResolver.resolve(entry.targetId()).flatMap(entityId -> {
             Identifier expected = Identifier.fromNamespaceAndPath(entityId.getNamespace(), "entities/" + entityId.getPath());
             return expected.equals(tableId)
@@ -104,13 +113,57 @@ public final class LootTableInjector {
         });
     }
 
-    private Optional<MatchedEntry> matchBlock(BlockDropEntry entry, Identifier tableId) {
+    private Optional<MatchedEntry> mobInTag(TagKey<EntityType<?>> tag, Identifier tableId, HolderLookup.Provider registries,
+                                            List<LootItemEntry> items, boolean replace) {
+        if (!tableId.getPath().startsWith("entities/")) return Optional.empty();
+        Identifier entityId = Identifier.fromNamespaceAndPath(tableId.getNamespace(),
+            tableId.getPath().substring("entities/".length()));
+        try {
+            HolderLookup.RegistryLookup<EntityType<?>> lookup = registries.lookupOrThrow(Registries.ENTITY_TYPE);
+            Optional<Holder.Reference<EntityType<?>>> holder =
+                lookup.get(ResourceKey.create(Registries.ENTITY_TYPE, entityId));
+            Optional<HolderSet.Named<EntityType<?>>> tagSet = lookup.get(tag);
+            if (holder.isPresent() && tagSet.isPresent() && tagSet.get().contains(holder.get())) {
+                return Optional.of(new MatchedEntry(items, List.of(), replace));
+            }
+        } catch (RuntimeException e) {
+            CustomDropsMod.LOGGER.debug("Could not resolve entity tag {} against loot table {}", tag, tableId, e);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<MatchedEntry> matchBlock(BlockDropEntry entry, Identifier tableId, HolderLookup.Provider registries) {
+        if (entry.isTag()) {
+            Identifier tagId = Identifier.tryParse(entry.targetId());
+            if (tagId == null) return Optional.empty();
+            return blockInTag(TagKey.create(Registries.BLOCK, tagId), tableId, registries,
+                entry.items(), entry.replaceVanillaTable());
+        }
         return IdentifierResolver.resolve(entry.targetId()).flatMap(blockId -> {
             Identifier expected = Identifier.fromNamespaceAndPath(blockId.getNamespace(), "blocks/" + blockId.getPath());
             return expected.equals(tableId)
                 ? Optional.of(new MatchedEntry(entry.items(), List.of(), entry.replaceVanillaTable()))
                 : Optional.<MatchedEntry>empty();
         });
+    }
+
+    private Optional<MatchedEntry> blockInTag(TagKey<Block> tag, Identifier tableId, HolderLookup.Provider registries,
+                                              List<LootItemEntry> items, boolean replace) {
+        if (!tableId.getPath().startsWith("blocks/")) return Optional.empty();
+        Identifier blockId = Identifier.fromNamespaceAndPath(tableId.getNamespace(),
+            tableId.getPath().substring("blocks/".length()));
+        try {
+            HolderLookup.RegistryLookup<Block> lookup = registries.lookupOrThrow(Registries.BLOCK);
+            Optional<Holder.Reference<Block>> holder =
+                lookup.get(ResourceKey.create(Registries.BLOCK, blockId));
+            Optional<HolderSet.Named<Block>> tagSet = lookup.get(tag);
+            if (holder.isPresent() && tagSet.isPresent() && tagSet.get().contains(holder.get())) {
+                return Optional.of(new MatchedEntry(items, List.of(), replace));
+            }
+        } catch (RuntimeException e) {
+            CustomDropsMod.LOGGER.debug("Could not resolve block tag {} against loot table {}", tag, tableId, e);
+        }
+        return Optional.empty();
     }
 
     private Optional<MatchedEntry> matchDirect(String targetId, Identifier tableId, List<LootItemEntry> items, boolean replaceVanillaTable) {
@@ -207,9 +260,8 @@ public final class LootTableInjector {
                 CustomDropsMod.LOGGER.warn("Skipping unknown enchantment id in config: {}", entry.enchantmentId());
                 continue;
             }
-            entryBuilder.apply(EnchantWithLevelsFunction.enchantWithLevels(registries,
-                ConstantValue.exactly(entry.level()))
-                .withOptions(HolderSet.direct(holder.get())));
+            entryBuilder.apply(new SetEnchantmentsFunction.Builder()
+                .withEnchantment(holder.get(), ConstantValue.exactly(entry.level())));
         }
     }
 

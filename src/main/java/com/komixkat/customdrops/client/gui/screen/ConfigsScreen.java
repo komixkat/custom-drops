@@ -39,10 +39,10 @@ public final class ConfigsScreen extends SplitPaneScreen {
 
     @Override
     protected void buildNavigation() {
-        navWidget.addCategory("Profiles");
+        navWidget.addCategory("Configs");
         for (String name : ConfigProfiles.names()) {
             String label = name + "  (" + ruleCountFor(name) + ")";
-            navWidget.addEntry("Profiles", label, () -> doSwitch(name));
+            navWidget.addEntry("Configs", label, () -> doSwitch(name));
         }
         navWidget.addCategory("Actions");
         navWidget.addEntry("Actions", "New Config", this::focusNewName);
@@ -115,47 +115,45 @@ public final class ConfigsScreen extends SplitPaneScreen {
         pane.addDivider(cur.x, cur.y, cur.w);
         cur.y += 12;
 
-        pane.addLabel(cur.x, cur.y, "Per-World Config", Ui.TEXT);
+        pane.addLabel(cur.x, cur.y, "This World's Config", Ui.TEXT);
         cur.y += Ui.LINE_H + 6;
         MinecraftServer server = net.minecraft.client.Minecraft.getInstance().getSingleplayerServer();
-        String worldName = server != null && server.getWorldData() != null
-            ? server.getWorldData().getLevelName() : null;
         Path worldCfgDir = server == null ? null : currentWorldConfigDir(server);
 
-        if (worldName == null) {
+        if (server == null) {
             pane.addLabel(cur.x, cur.y, "Not in a single-player world right now.", Ui.DIM);
             cur.y += Ui.LINE_H + 2;
-            pane.addLabel(cur.x, cur.y, "Enter a world to manage its per-world config here.", Ui.DIM);
+            pane.addLabel(cur.x, cur.y, "Join a world to see its setting here.", Ui.DIM);
             cur.y += Ui.LINE_H + 12;
         } else {
             boolean linked = worldCfgDir != null && Files.exists(worldCfgDir.resolve("mob_drops.json"))
                 || worldCfgDir != null && Files.exists(worldCfgDir.resolve("meta.json"));
-            pane.addLabel(cur.x, cur.y, "World: \"" + worldName + "\"", Ui.TEXT);
-            cur.y += Ui.LINE_H + 2;
-            pane.addLabel(cur.x, cur.y, linked
-                ? "This world has its own config overriding the active profile."
-                : "This world currently uses the active profile with no override.", linked ? Ui.WARN : Ui.DIM);
-            cur.y += Ui.LINE_H + 8;
-
             if (linked) {
-                int bw = Math.max(120, (cur.w - 4) / 2);
-                pane.addButton(cur, cur.x, cur.y, bw,
-                    "Unlink (revert to active profile)", () -> doUnlinkWorld(worldCfgDir));
-                pane.addButton(cur, cur.x + bw + 4, cur.y, bw,
-                    "Re-link from active profile", () -> doLinkWorld(worldCfgDir));
+                pane.addLabel(cur.x, cur.y, "Uses its own config. It ignores the active config.", Ui.WARN);
+                cur.y += Ui.LINE_H + 2;
+                pane.addLabel(cur.x, cur.y, "A world keeps its own config until you clear it.", Ui.DIM);
             } else {
-                pane.addButton(cur, cur.x, cur.y, Math.min(220, cur.w),
-                    "Link active profile to this world", () -> doLinkWorld(worldCfgDir));
+                pane.addLabel(cur.x, cur.y, "Uses the active config: \"" + ConfigProfiles.active() + "\"", Ui.DIM);
+                cur.y += Ui.LINE_H + 2;
+                pane.addLabel(cur.x, cur.y, "It keeps using this config until you overwrite it.", Ui.DIM);
             }
+            cur.y += Ui.LINE_H + 8;
+            pane.addButton(cur, cur.x, cur.y, Math.min(260, cur.w),
+                "Overwrite With a Config...", this::pickOverwriteConfig);
             cur.y += Ui.BUTTON_H + 12;
+            if (linked) {
+                pane.addButton(cur, cur.x, cur.y, Math.min(260, cur.w),
+                    "Clear this World's Config (use Active)", this::confirmClearWorldConfig);
+                cur.y += Ui.BUTTON_H + 12;
+            }
         }
 
         pane.addDivider(cur.x, cur.y, cur.w);
         cur.y += 12;
 
-        pane.addLabel(cur.x, cur.y, "Reset the ACTIVE config back to vanilla defaults.", Ui.MUTED);
+        pane.addLabel(cur.x, cur.y, "Reset. Wipes every rule in the active config.", Ui.MUTED);
         cur.y += Ui.LINE_H + 2;
-        pane.addLabel(cur.x, cur.y, "This wipes every rule in the active config, in memory and on disk.", Ui.DIM);
+        pane.addLabel(cur.x, cur.y, "This includes the saved copy on disk.", Ui.DIM);
         cur.y += Ui.LINE_H + 6;
         pane.addButton(cur, cur.x, cur.y, Math.min(260, cur.w), "Reset Active Config to Vanilla", this::confirmReset);
         cur.y += Ui.BUTTON_H + 10;
@@ -192,8 +190,8 @@ public final class ConfigsScreen extends SplitPaneScreen {
         if (name.equals(ConfigProfiles.active())) return;
         this.minecraft.gui.setScreen(new ConfirmDialogScreen(this,
             "Switch the active config to \"" + name + "\"?",
-            List.of("The active profile is what new edits and the running world use.",
-                "The current active config \"" + ConfigProfiles.active() + "\" stays on disk."),
+            List.of("The active config is what the editor and the",
+                "running world use right now. The old config stays saved."),
             "Switch", () -> {
                 if (ConfigProfiles.switchTo(name)) {
                     statusMessage = "Switched to config \"" + name + "\".";
@@ -259,57 +257,62 @@ public final class ConfigsScreen extends SplitPaneScreen {
             }));
     }
 
-    private void doLinkWorld(Path worldCfgDir) {
-        this.minecraft.gui.setScreen(new ConfirmDialogScreen(this,
-            "Link the active config \"" + ConfigProfiles.active() + "\" to world \"" + worldNameSafe() + "\"?",
-            List.of("The world \"" + worldNameSafe() + "\" will get its own copy of",
-                "the active profile and keep it even if you switch profiles."),
-            "Link", () -> { performLinkWorld(worldCfgDir); }));
-    }
-
-    private void performLinkWorld(Path worldCfgDir) {
+    private void confirmClearWorldConfig() {
         MinecraftServer server = net.minecraft.client.Minecraft.getInstance().getSingleplayerServer();
         if (server == null) {
             statusMessage = "Not in a single-player world right now.";
             buildHub();
             return;
         }
-        CustomDropsMod.linkActiveProfileToWorld(server);
-        CustomDropsMod.reloadForRunningWorld();
-        statusMessage = "Linked the active profile \"" + ConfigProfiles.active()
-            + "\" to world \"" + worldNameSafe() + "\" and reloaded it.";
-        buildHub();
-    }
-
-    private void doUnlinkWorld(Path worldCfgDir) {
         this.minecraft.gui.setScreen(new ConfirmDialogScreen(this,
-            "Unlink world \"" + worldNameSafe() + "\" from its per-world config?",
-            List.of("The world's own config files will remain on disk,",
-                "but the world will go back to using the active profile."),
-            "Unlink", () -> { performUnlinkWorld(worldCfgDir); }));
+            "Clear this world's config?",
+            List.of("The world will stop using its own drops",
+                "and go back to the active config.",
+                "This cannot be undone."),
+            "Clear", () -> {
+                if (CustomDropsMod.clearWorldConfig(server)) {
+                    statusMessage = "World config cleared; it now uses the active config.";
+                } else {
+                    statusMessage = "No world config to clear.";
+                }
+                CustomDropsMod.reloadForRunningWorld();
+                buildHub();
+            }));
     }
 
-    private void performUnlinkWorld(Path worldCfgDir) {
+    private void pickOverwriteConfig() {
+        if (net.minecraft.client.Minecraft.getInstance().getSingleplayerServer() == null) {
+            statusMessage = "Not in a single-player world right now.";
+            buildHub();
+            return;
+        }
+        this.minecraft.gui.setScreen(new PickConfigDialogScreen(this,
+            "Overwrite this world's config with...",
+            ConfigProfiles.names(), ConfigProfiles.active(),
+            name -> this.minecraft.gui.setScreen(new ConfirmDialogScreen(this,
+                "Overwrite with \"" + name + "\"?",
+                java.util.List.of("Replaces this world's drops right now.",
+                    "It cannot be rolled back from here.",
+                    "Keep a backup of the world first."),
+                "Overwrite",
+                () -> performOverwriteWorld(name)))));
+    }
+
+    private void performOverwriteWorld(String name) {
         MinecraftServer server = net.minecraft.client.Minecraft.getInstance().getSingleplayerServer();
         if (server == null) {
             statusMessage = "Not in a single-player world right now.";
             buildHub();
             return;
         }
-        CustomDropsMod.unlinkWorldConfig(server);
+        CustomDropsMod.linkConfigToWorld(server, name);
         CustomDropsMod.reloadForRunningWorld();
-        statusMessage = "Removed the per-world config. World \"" + worldNameSafe()
-            + "\" now uses the active profile, reloaded.";
+        statusMessage = "Overwrote this world with \"" + name + "\".";
         buildHub();
     }
 
     private static Path currentWorldConfigDir(MinecraftServer server) {
         return server.getWorldPath(LevelResource.ROOT).resolve("customdrops");
-    }
-
-    private static String worldNameSafe() {
-        MinecraftServer server = net.minecraft.client.Minecraft.getInstance().getSingleplayerServer();
-        return server != null && server.getWorldData() != null ? server.getWorldData().getLevelName() : "?";
     }
 
     private static int ruleCountFor(String name) {

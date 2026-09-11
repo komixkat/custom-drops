@@ -15,8 +15,16 @@ public final class SuggestionPopup {
 
     private final List<SuggestionEntry> entries = new ArrayList<>();
     private int scrollOffset = 0;
+    private String hint = null;
+
+    public void setHint(String hint) {
+        this.hint = hint;
+        entries.clear();
+        scrollOffset = 0;
+    }
 
     public void update(List<SuggestionProvider.Suggestion> suggestions) {
+        hint = null;
         entries.clear();
         scrollOffset = 0;
 
@@ -39,7 +47,7 @@ public final class SuggestionPopup {
         int fieldBottom = fieldTop + field.getHeight();
         int fieldWidth = Math.max(field.getWidth(), 40);
 
-        int visibleCount = Math.min(MAX_VISIBLE, entries.size());
+        int visibleCount = hint != null ? 1 : Math.min(MAX_VISIBLE, entries.size());
         if (visibleCount == 0) return null;
 
         int popupHeight = visibleCount * ROW_HEIGHT;
@@ -60,11 +68,18 @@ public final class SuggestionPopup {
     public void render(GuiGraphicsExtractor guiGraphics, RegistryAutocompleteField field, int mouseX, int mouseY, int selectedIndex) {
         Bounds b = computeBounds(field, guiGraphics.guiHeight());
         if (b == null) return;
-        int visibleRows = Math.max(1, (b.bottom - b.top) / ROW_HEIGHT);
 
         guiGraphics.fill(b.x - 1, b.top - 1, b.x + b.width + 1, b.bottom + 1, 0xFF101010);
         guiGraphics.fill(b.x, b.top, b.x + b.width, b.bottom, 0xFF202020);
 
+        int maxTextW = Math.max(20, b.width - 6);
+        var font = net.minecraft.client.Minecraft.getInstance().font;
+        if (hint != null) {
+            guiGraphics.text(font, font.plainSubstrByWidth(hint, maxTextW), b.x + 3, b.top + 3, 0xFF808080, false);
+            return;
+        }
+
+        int visibleRows = Math.max(1, (b.bottom - b.top) / ROW_HEIGHT);
         int firstVisible = b.above ? Math.max(0, entries.size() - visibleRows) : scrollOffset;
         int rowY = b.top;
         for (int i = firstVisible; i < entries.size() && rowY + ROW_HEIGHT <= b.bottom; i++) {
@@ -73,12 +88,35 @@ public final class SuggestionPopup {
                 guiGraphics.fill(b.x, rowY, b.x + b.width, rowY + ROW_HEIGHT, 0xFF3050A0);
             }
             if (entry.isHeader) {
-                guiGraphics.text(net.minecraft.client.Minecraft.getInstance().font, entry.namespace, b.x + 3, rowY + 3, 0xFF808080, false);
+                guiGraphics.text(font, font.plainSubstrByWidth(entry.namespace, maxTextW), b.x + 3, rowY + 3, 0xFF808080, false);
             } else {
-                guiGraphics.text(net.minecraft.client.Minecraft.getInstance().font, entry.suggestion.id(), b.x + 3, rowY + 3, 0xFFE0E0E0, false);
+                drawSuggestion(guiGraphics, font, entry.suggestion.id(), field.currentQuery(), b.x + 3, rowY + 3, maxTextW);
             }
             rowY += ROW_HEIGHT;
         }
+    }
+
+    private static void drawSuggestion(GuiGraphicsExtractor guiGraphics, net.minecraft.client.gui.Font font,
+                                       String id, String query, int x, int y, int maxTextW) {
+        String text = font.plainSubstrByWidth(id, maxTextW);
+        String needle = null;
+        if (query != null && !query.isBlank()) {
+            needle = id.startsWith("#") && query.startsWith("#") ? query.substring(1) : query;
+        }
+        int idx = -1;
+        if (needle != null && !needle.isBlank()) {
+            idx = text.toLowerCase().indexOf(needle.toLowerCase());
+        }
+        if (idx < 0) {
+            guiGraphics.text(font, text, x, y, 0xFFE0E0E0, false);
+            return;
+        }
+        String pre = text.substring(0, idx);
+        String match = text.substring(idx, Math.min(text.length(), idx + needle.length()));
+        String post = text.substring(Math.min(text.length(), idx + needle.length()));
+        guiGraphics.text(font, pre, x, y, 0xFFE0E0E0, false);
+        guiGraphics.text(font, match, x + font.width(pre), y, 0xFF55FF55, false);
+        guiGraphics.text(font, post, x + font.width(pre) + font.width(match), y, 0xFFE0E0E0, false);
     }
 
     public int size() {

@@ -5,6 +5,7 @@ import com.komixkat.customdrops.client.gui.UiSfx;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,6 +13,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Left-hand navigation list used by the split-pane screens.
+ *
+ * Layout is derived from a single flat {@link Row} list that is rebuilt on every
+ * structural change ({@link #relayout()}). Both rendering and hit-testing consume
+ * exactly that list, so a click can only ever target a row that was drawn this frame.
+ * Scroll is clamped eagerly on every change and anchored to the first visible row, so
+ * expanding/collapsing categories never shifts the list out from under the cursor.
+ */
 public final class NavigationWidget {
 
     /** Serializable view state used by {@link #snapshotState()} / {@link #restoreState(NavState)}. */
@@ -19,6 +29,11 @@ public final class NavigationWidget {
         final Set<String> expanded = new LinkedHashSet<>();
         double scrollFraction = 0.0;
     }
+
+    private static final int CATEGORY_HEIGHT = 22;
+    private static final int ENTRY_HEIGHT = 18;
+    private static final int INDENT = 12;
+    private static final int SCROLLBAR_WIDTH = 8;
 
     private final net.minecraft.client.gui.Font font =
         net.minecraft.client.Minecraft.getInstance().font;
@@ -30,16 +45,17 @@ public final class NavigationWidget {
 
     private final List<Node> roots = new ArrayList<>();
     private final Map<String, Node> rootByName = new LinkedHashMap<>();
+    private final List<Row> rows = new ArrayList<>();
     private String selectedLabel = null;
     private int scrollOffset = 0;
+    private int maxScroll = 0;
     private boolean thumbDragging = false;
     private int thumbGrabOffset = 0;
     private String filter = "";
+    private boolean needsLayout = true;
 
-    private static final int CATEGORY_HEIGHT = 22;
-    private static final int ENTRY_HEIGHT = 18;
-    private static final int INDENT = 12;
-    private static final int SCROLLBAR_WIDTH = 8;
+    /** Category open/closed state kept across screen re-inits (Gui.setScreen re-runs init). */
+    private static final Map<String, Boolean> expansionMemory = new HashMap<>();
 
     public NavigationWidget(int x, int y, int width, int height) {
         this.x = x;
@@ -53,7 +69,7 @@ public final class NavigationWidget {
         this.y = y;
         this.width = width;
         this.height = height;
-        clampScroll();
+        relayout();
     }
 
     /**
@@ -63,7 +79,7 @@ public final class NavigationWidget {
      */
     public void setFilter(String filter) {
         this.filter = filter == null ? "" : filter.trim().toLowerCase(Locale.ROOT);
-        clampScroll();
+        relayout();
     }
 
     public String getFilter() {
@@ -75,26 +91,54 @@ public final class NavigationWidget {
     }
 
     public void addCategory(String name, int count) {
-        ensureRoot(name).expanded = true;
         ensureRoot(name).count = count;
+        needsLayout = true;
+        applyExpansionMemory();
     }
 
     public void markEntryWarn(String label, boolean warn) {
-        markWarnRecursive(roots, label, warn);
+        markAllLeaves(roots, label, warn);
     }
 
-    private boolean markWarnRecursive(List<Node> nodes, String label, boolean warn) {
+    /**
+     * Marks the warn flag on the exact row earlier registered by
+     * {@link #addEntryPath(List, String, Runnable)} with the same segments and label,
+     * preserving deduplicated " (N)" suffixes.
+     */
+    public void markEntryWarn(List<String> segments, String label, boolean warn) {
+        Node leaf = resolveLeaf(segments, label);
+        if (leaf != null) {
+            leaf.warn = warn;
+        }
+    }
+
+    private Node resolveLeaf(List<String> segments, String label) {
+        if (segments == null || segments.isEmpty()) return null;
+        Node parent = null;
+        for (String segment : segments) {
+            parent = (parent == null) ? rootByName.get(segment) : findChild(parent, segment);
+            if (parent == null) return null;
+        }
+        long dup = parent.children.stream().filter(c -> c.isLeaf() && c.label.equals(label)).count();
+        String target = dup > 0 ? label + " (" + (dup + 1) + ")" : label;
+        for (Node child : parent.children) {
+            if (child.isLeaf() && child.label.equals(target)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    private void markAllLeaves(List<Node> nodes, String label, boolean warn) {
         for (Node node : nodes) {
             if (node.isLeaf()) {
                 if (node.label.equals(label)) {
                     node.warn = warn;
-                    return true;
                 }
-            } else if (markWarnRecursive(node.children, label, warn)) {
-                return true;
+            } else {
+                markAllLeaves(node.children, label, warn);
             }
         }
-        return false;
     }
 
     public void addEntry(String category, String label, Runnable onClick) {
@@ -107,35 +151,105 @@ public final class NavigationWidget {
     }
 
     public void addEntryPath(List<String> segments, String label, Runnable onClick) {
+        addEntryPath(segments, label, label, onClick);
+    }
+
+    public void addEntryPath(List<String> segments, String label, String searchText, Runnable onClick) {
         if (segments == null || segments.isEmpty()) return;
         Node parent = null;
+        boolean rootSegment = true;
         for (String segment : segments) {
             parent = (parent == null) ? ensureRoot(segment) : ensureChild(parent, segment);
-            parent.expanded = true;
+            if (!rootSegment) {
+                parent.expanded = true;
+            }
+            rootSegment = false;
         }
-        Node leaf = new Node(label, onClick);
+        String searchNeeded = searchText == null ? label : searchText;
+        Node leaf = new Node(label, searchNeeded, onClick);
         if (parent != null) {
             long dup = parent.children.stream().filter(c -> c.label.equals(label)).count();
             if (dup > 0) {
-                leaf = new Node(label + " (" + (dup + 1) + ")", onClick);
+                leaf = new Node(label + " (" + (dup + 1) + ")", searchNeeded, onClick);
             }
             parent.children.add(leaf);
+        }
+        needsLayout = true;
+        applyExpansionMemory();
+    }
+
+    private void applyExpansionMemory() {
+        for (Node root : roots) {
+            applyExpansionMemory(root, root.label);
+        }
+    }
+
+    private void applyExpansionMemory(Node node, String path) {
+        if (!node.isLeaf()) {
+            Boolean remembered = expansionMemory.get(path);
+            if (remembered != null) {
+                node.expanded = remembered;
+            }
+            for (Node child : node.children) {
+                applyExpansionMemory(child, path + "/" + child.label);
+            }
+        }
+    }
+
+    private void rememberExpansion(Node node) {
+        String path = findPath(roots, node, "");
+        if (path != null && !node.isLeaf()) {
+            expansionMemory.put(path, node.expanded);
+        }
+    }
+
+    private String findPath(List<Node> nodes, Node target, String prefix) {
+        for (Node node : nodes) {
+            String path = prefix.isEmpty() ? node.label : prefix + "/" + node.label;
+            if (node == target) return path;
+            if (!node.isLeaf()) {
+                String found = findPath(node.children, target, path);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    private void persistExpansionToMemory(List<Node> nodes, String prefix) {
+        for (Node node : nodes) {
+            String path = prefix.isEmpty() ? node.label : prefix + "/" + node.label;
+            if (!node.isLeaf()) {
+                expansionMemory.put(path, node.expanded);
+                persistExpansionToMemory(node.children, path);
+            }
         }
     }
 
     public void clear() {
         roots.clear();
         rootByName.clear();
+        rows.clear();
         selectedLabel = null;
         scrollOffset = 0;
+        maxScroll = 0;
+        thumbDragging = false;
+        needsLayout = true;
+    }
+
+    /** Rebuilds the flat row list right away if any structural change left it stale. */
+    private void ensureLayout() {
+        if (needsLayout) {
+            relayout();
+        }
     }
 
     /** Captures which categories are expanded plus the current scroll fraction. */
     public NavState snapshotState() {
+        ensureLayout();
+        persistExpansionToMemory(roots, "");
         NavState state = new NavState();
         collectExpanded(roots, "", state.expanded);
-        int maxScroll = maxScroll();
-        state.scrollFraction = maxScroll > 0 ? (double) effectiveScroll() / maxScroll : 0.0;
+        state.scrollFraction = maxScroll > 0 ? (double) scrollOffset / maxScroll : 0.0;
         return state;
     }
 
@@ -143,14 +257,14 @@ public final class NavigationWidget {
     public void restoreState(NavState state) {
         if (state == null) return;
         applyExpanded(roots, "", state.expanded);
+        relayout();
         double fraction = state.scrollFraction;
         if (!Double.isFinite(fraction)) {
             fraction = 0.0;
         }
         fraction = Math.max(0.0, Math.min(1.0, fraction));
-        int maxScroll = maxScroll();
         scrollOffset = (int) Math.round(fraction * maxScroll);
-        clampScroll();
+        scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset));
     }
 
     private void collectExpanded(List<Node> nodes, String prefix, Set<String> out) {
@@ -184,17 +298,30 @@ public final class NavigationWidget {
     }
 
     public boolean triggerEntry(String label, boolean silent) {
-        return triggerEntryRecursive(roots, label, silent);
+        Node leaf = findLeaf(roots, label);
+        if (leaf == null) return false;
+        expandAncestors(roots, leaf);
+        relayout();
+        runEntry(leaf, label, silent);
+        return true;
     }
 
-    private boolean triggerEntryRecursive(List<Node> nodes, String label, boolean silent) {
+    private Node findLeaf(List<Node> nodes, String label) {
         for (Node node : nodes) {
             if (node.isLeaf()) {
-                if (node.label.equals(label)) {
-                    runEntry(node, label, silent);
-                    return true;
-                }
-            } else if (triggerEntryRecursive(node.children, label, silent)) {
+                if (node.label.equals(label)) return node;
+            } else {
+                Node found = findLeaf(node.children, label);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    private boolean expandAncestors(List<Node> nodes, Node target) {
+        for (Node node : nodes) {
+            if (node == target) return true;
+            if (!node.isLeaf() && expandAncestors(node.children, target)) {
                 node.expanded = true;
                 return true;
             }
@@ -212,10 +339,20 @@ public final class NavigationWidget {
     }
 
     public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+        ensureLayout();
         guiGraphics.fill(x, y, x + width, y + height, 0xFF181818);
-        int currentY = y - effectiveScroll();
         guiGraphics.enableScissor(x, y, x + width, y + height);
-        renderNodes(guiGraphics, mouseX, mouseY, roots, currentY, 0);
+        for (Row row : rows) {
+            int rowY = y + row.y - scrollOffset;
+            if (rowY + row.height <= y || rowY >= y + height) {
+                continue;
+            }
+            if (row.node.isLeaf()) {
+                renderEntry(guiGraphics, mouseX, mouseY, row, rowY);
+            } else {
+                renderCategory(guiGraphics, row, rowY);
+            }
+        }
         guiGraphics.disableScissor();
 
         int[] thumb = thumbRect();
@@ -224,33 +361,10 @@ public final class NavigationWidget {
         }
     }
 
-    private int renderNodes(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, List<Node> nodes,
-                             int currentY, int depth) {
-        for (Node node : nodes) {
-            if (!isVisible(node)) {
-                continue;
-            }
-            if (node.isLeaf()) {
-                if (currentY < y + height && currentY + ENTRY_HEIGHT > y) {
-                    renderEntry(guiGraphics, mouseX, mouseY, node, currentY, depth);
-                }
-                currentY += ENTRY_HEIGHT;
-            } else {
-                if (currentY < y + height && currentY + CATEGORY_HEIGHT > y) {
-                    renderCategory(guiGraphics, mouseX, mouseY, node, currentY, depth);
-                }
-                currentY += CATEGORY_HEIGHT;
-                if (node.expanded) {
-                    currentY = renderNodes(guiGraphics, mouseX, mouseY, node.children, currentY, depth + 1);
-                }
-            }
-        }
-        return currentY;
-    }
-
-    private void renderCategory(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY,
-                                Node node, int currentY, int depth) {
-        guiGraphics.fill(x, currentY, x + width, currentY + CATEGORY_HEIGHT, 0xFF252525);
+    private void renderCategory(GuiGraphicsExtractor guiGraphics, Row row, int rowY) {
+        Node node = row.node;
+        int depth = row.depth;
+        guiGraphics.fill(x, rowY, x + width, rowY + CATEGORY_HEIGHT, 0xFF252525);
         int textX = x + 6 + depth * INDENT;
         String countSuffix = node.count >= 0 ? " (" + node.count + ")" : "";
         if (countSuffix.isEmpty() && !node.isLeaf()) {
@@ -259,32 +373,33 @@ public final class NavigationWidget {
         }
         int countW = countSuffix.isEmpty() ? 0 : font.width(" " + countSuffix);
         String clipped = clip(textX, node.label, 14 + countW);
-        guiGraphics.text(font, clipped, textX, currentY + 7, 0xFFAAAAAA, false);
+        guiGraphics.text(font, clipped, textX, rowY + 7, 0xFFAAAAAA, false);
         if (!countSuffix.isEmpty() && !clipped.endsWith("\u2026")) {
-            guiGraphics.text(font, countSuffix, textX + font.width(clipped) + 2, currentY + 7, 0xFF707070, false);
+            guiGraphics.text(font, countSuffix, textX + font.width(clipped) + 2, rowY + 7, 0xFF707070, false);
         }
-        guiGraphics.text(font, node.expanded ? "-" : "+", x + width - 15, currentY + 7, 0xFF888888, false);
+        guiGraphics.text(font, node.expanded ? "-" : "+", x + width - 15, rowY + 7, 0xFF888888, false);
     }
 
-    private void renderEntry(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY,
-                             Node node, int currentY, int depth) {
+    private void renderEntry(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, Row row, int rowY) {
+        Node node = row.node;
+        int depth = row.depth;
         boolean selected = node.label.equals(selectedLabel);
         boolean hovered = mouseX >= x && mouseX < x + width
-            && mouseY >= currentY && mouseY < currentY + ENTRY_HEIGHT;
+            && mouseY >= rowY && mouseY < rowY + ENTRY_HEIGHT;
 
         if (selected) {
-            guiGraphics.fill(x, currentY, x + width, currentY + ENTRY_HEIGHT, 0xFF3050A0);
+            guiGraphics.fill(x, rowY, x + width, rowY + ENTRY_HEIGHT, 0xFF3050A0);
         } else if (hovered) {
-            guiGraphics.fill(x, currentY, x + width, currentY + ENTRY_HEIGHT, 0xFF303030);
+            guiGraphics.fill(x, rowY, x + width, rowY + ENTRY_HEIGHT, 0xFF303030);
         }
 
         if (node.warn) {
-            guiGraphics.text(font, "!", x + 4, currentY + 5, 0xFFFF5533, false);
+            guiGraphics.text(font, "!", x + 4, rowY + 5, 0xFFFF5533, false);
         }
 
         int textX = x + 6 + depth * INDENT;
-        String clipped = clip(textX, node.label, node.warn ? 0 : 0);
-        guiGraphics.text(font, clipped, textX, currentY + 5, selected ? 0xFFFFFFFF : 0xFFD0D0D0, false);
+        String clipped = clip(textX, node.label, 0);
+        guiGraphics.text(font, clipped, textX, rowY + 5, selected ? 0xFFFFFFFF : 0xFFD0D0D0, false);
     }
 
     private String clip(int textX, String label, int reservePx) {
@@ -298,28 +413,36 @@ public final class NavigationWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseX < x || mouseX > x + width || mouseY < y || mouseY > y + height) return false;
         if (button != 0) return false;
+        ensureLayout();
 
         if (tryThumbClick(mouseX, mouseY)) return true;
 
-        int currentY = y - effectiveScroll();
-        if (clickNodes(mouseX, mouseY, roots, currentY, 0) < 0) {
-            return true;
+        for (Row row : rows) {
+            int rowY = y + row.y - scrollOffset;
+            if (mouseY >= rowY && mouseY < rowY + row.height) {
+                if (row.node.isLeaf()) {
+                    runEntry(row.node, row.node.label, false);
+                } else {
+                    row.node.expanded = !row.node.expanded;
+                    rememberExpansion(row.node);
+                    UiSfx.click();
+                    relayout();
+                }
+                return true;
+            }
         }
-        com.komixkat.customdrops.CustomDropsMod.LOGGER.debug(
-            "NavigationWidget click miss at ({}, {}) scrollOffset={} height={}",
-            mouseX, mouseY, effectiveScroll(), height);
         return true;
     }
 
     public boolean mouseDragged(double mouseX, double mouseY) {
         if (!thumbDragging) return false;
-        int maxScroll = maxScroll();
+        ensureLayout();
         if (maxScroll <= 0) {
             thumbDragging = false;
             return false;
         }
-        int barH = Math.max(16, (int) ((float) height / scrollableHeight() * height));
-        int usable = Math.max(1, height - barH);
+        int barHeight = thumbHeight();
+        int usable = Math.max(1, height - barHeight);
         float frac = (float) (mouseY - y - thumbGrabOffset) / usable;
         scrollOffset = Math.max(0, Math.min(maxScroll, Math.round(frac * maxScroll)));
         return true;
@@ -334,7 +457,6 @@ public final class NavigationWidget {
     }
 
     private boolean tryThumbClick(double mouseX, double mouseY) {
-        int maxScroll = maxScroll();
         if (maxScroll <= 0) return false;
         boolean inTrack = mouseX >= x + width - SCROLLBAR_WIDTH && mouseX <= x + width
             && mouseY >= y && mouseY <= y + height;
@@ -344,88 +466,121 @@ public final class NavigationWidget {
             thumbDragging = true;
             thumbGrabOffset = (int) mouseY - thumb[0];
         } else {
-            int barH = Math.max(16, (int) ((float) height / scrollableHeight() * height));
-            int usable = Math.max(1, height - barH);
-            float frac = (float) (mouseY - y - barH / 2.0f) / usable;
+            int barHeight = thumbHeight();
+            int usable = Math.max(1, height - barHeight);
+            float frac = (float) (mouseY - y - barHeight / 2.0f) / usable;
             scrollOffset = Math.max(0, Math.min(maxScroll, Math.round(frac * maxScroll)));
             thumbDragging = true;
-            thumbGrabOffset = barH / 2;
+            thumbGrabOffset = barHeight / 2;
         }
         return true;
     }
 
     private int[] thumbRect() {
-        if (scrollableHeight() <= height) return null;
-        int maxScroll = maxScroll();
-        int barH = Math.max(16, (int) ((float) height / scrollableHeight() * height));
-        int barY = y + (int) ((float) effectiveScroll() / maxScroll * (height - barH));
-        return new int[] { barY, barH };
+        if (maxScroll <= 0) return null;
+        int barHeight = thumbHeight();
+        int barY = y + (int) ((float) scrollOffset / maxScroll * (height - barHeight));
+        return new int[] { barY, barHeight };
     }
 
-    private int clickNodes(double mouseX, double mouseY, List<Node> nodes, int currentY, int depth) {
-        for (Node node : nodes) {
-            if (!isVisible(node)) {
-                continue;
-            }
-            if (node.isLeaf()) {
-                if (mouseY >= currentY && mouseY < currentY + ENTRY_HEIGHT) {
-                    runEntry(node, node.label, false);
-                    return -1;
-                }
-                currentY += ENTRY_HEIGHT;
-            } else {
-                if (mouseY >= currentY && mouseY < currentY + CATEGORY_HEIGHT) {
-                    node.expanded = !node.expanded;
-                    UiSfx.click();
-                    return -1;
-                }
-                currentY += CATEGORY_HEIGHT;
-                if (node.expanded) {
-                    int consumed = clickNodes(mouseX, mouseY, node.children, currentY, depth + 1);
-                    if (consumed < 0) return -1;
-                    currentY = consumed;
-                }
-            }
-        }
-        return currentY;
+    private int thumbHeight() {
+        int content = scrollableHeight();
+        return Math.max(16, (int) ((float) height / Math.max(1, content) * height));
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (mouseX < x || mouseX > x + width || mouseY < y || mouseY > y + height) return false;
-        int maxScroll = maxScroll();
+        ensureLayout();
         int step = Math.max(ENTRY_HEIGHT * 3, height / 3);
-        scrollOffset = Math.max(0, Math.min(maxScroll, effectiveScroll() - (int) (verticalAmount * step)));
+        scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) (verticalAmount * step)));
         return true;
     }
 
-    private int maxScroll() {
-        return Math.max(0, scrollableHeight() - height);
-    }
-
-    private int effectiveScroll() {
-        return Math.max(0, Math.min(maxScroll(), scrollOffset));
-    }
-
-    private void clampScroll() {
-        scrollOffset = effectiveScroll();
-    }
-
     private int scrollableHeight() {
-        return totalHeight(roots);
+        if (!rows.isEmpty()) {
+            Row last = rows.get(rows.size() - 1);
+            return last.y + last.height;
+        }
+        return 0;
     }
 
-    private int totalHeight(List<Node> nodes) {
-        int total = 0;
+    /**
+     * Rebuilds the flat visible-row list and eagerly rescales scroll so the first
+     * visible row stays where it was. Called after every structural change.
+     */
+    private void relayout() {
+        int previousMax = maxScroll;
+        List<String> anchoredPath = null;
+        int anchoredOffset = 0;
+        for (Row row : rows) {
+            if (row.y + row.height > scrollOffset) {
+                anchoredPath = row.path;
+                anchoredOffset = Math.max(0, scrollOffset - row.y);
+                break;
+            }
+        }
+
+        rows.clear();
+        buildRows(roots, 0, 0, List.of());
+
+        int newMax = Math.max(0, scrollableHeight() - height);
+        if (anchoredPath != null) {
+            int anchoredY = rowYOf(anchoredPath);
+            if (anchoredY >= 0) {
+                scrollOffset = anchoredY - anchoredOffset;
+            } else {
+                scrollOffset = Math.min(scrollOffset, newMax);
+            }
+        } else if (previousMax > 0) {
+            scrollOffset = (int) Math.round(
+                (float) Math.min(Math.max(0, scrollOffset), previousMax) / previousMax * newMax);
+        } else {
+            scrollOffset = 0;
+        }
+        maxScroll = newMax;
+        scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset));
+        needsLayout = false;
+    }
+
+    private int buildRows(List<Node> nodes, int depth, int y, List<String> prefix) {
         for (Node node : nodes) {
             if (!isVisible(node)) {
                 continue;
             }
-            total += node.isLeaf() ? ENTRY_HEIGHT : CATEGORY_HEIGHT;
-            if (!node.isLeaf() && node.expanded) {
-                total += totalHeight(node.children);
+            List<String> path = new ArrayList<>(prefix.size() + 1);
+            path.addAll(prefix);
+            path.add(node.label);
+            if (node.isLeaf()) {
+                rows.add(new Row(node, y, ENTRY_HEIGHT, depth, path));
+                y += ENTRY_HEIGHT;
+            } else {
+                rows.add(new Row(node, y, CATEGORY_HEIGHT, depth, path));
+                y += CATEGORY_HEIGHT;
+                if (node.expanded) {
+                    y = buildRows(node.children, depth + 1, y, path);
+                }
             }
         }
-        return total;
+        return y;
+    }
+
+    private int rowYOf(List<String> path) {
+        for (Row row : rows) {
+            if (row.path.equals(path)) {
+                return row.y;
+            }
+        }
+        return -1;
+    }
+
+    private void scrollToEntry(String label) {
+        ensureLayout();
+        for (Row row : rows) {
+            if (row.node.isLeaf() && row.node.label.equals(label)) {
+                scrollOffset = Math.max(0, Math.min(maxScroll, row.y - 4));
+                return;
+            }
+        }
     }
 
     /** A node is visible when the filter is empty, or it or any descendant matches it. */
@@ -447,7 +602,12 @@ public final class NavigationWidget {
     }
 
     private boolean containsMatch(Node node, String needle) {
-        return node.label.toLowerCase(Locale.ROOT).contains(needle);
+        if (node.label.toLowerCase(Locale.ROOT).contains(needle)) {
+            return true;
+        }
+        return node.searchText != null
+            && !node.searchText.equals(node.label)
+            && node.searchText.toLowerCase(Locale.ROOT).contains(needle);
     }
 
     private int visibleLeafCount(Node node) {
@@ -461,53 +621,10 @@ public final class NavigationWidget {
         return total;
     }
 
-    private void scrollToEntry(String label) {
-        int[] pos = findEntryY(roots, label, 0);
-        if (pos == null) return;
-        int targetTop = pos[0];
-        int maxScroll = maxScroll();
-        scrollOffset = Math.max(0, Math.min(maxScroll, targetTop - 4));
-    }
-
-    private int[] findEntryY(List<Node> nodes, String label, int currentY) {
-        for (Node node : nodes) {
-            if (!isVisible(node)) {
-                continue;
-            }
-            if (node.isLeaf()) {
-                if (node.label.equals(label)) {
-                    return new int[]{currentY};
-                }
-                currentY += ENTRY_HEIGHT;
-            } else {
-                currentY += CATEGORY_HEIGHT;
-                if (node.expanded) {
-                    int[] found = findEntryY(node.children, label, currentY);
-                    if (found != null) return found;
-                    currentY = yOfChildren(node.children, currentY);
-                }
-            }
-        }
-        return null;
-    }
-
-    private int yOfChildren(List<Node> nodes, int currentY) {
-        for (Node node : nodes) {
-            if (!isVisible(node)) {
-                continue;
-            }
-            currentY += node.isLeaf() ? ENTRY_HEIGHT : CATEGORY_HEIGHT;
-            if (!node.isLeaf() && node.expanded) {
-                currentY = yOfChildren(node.children, currentY);
-            }
-        }
-        return currentY;
-    }
-
     private Node ensureRoot(String name) {
         Node root = rootByName.get(name);
         if (root == null) {
-            root = new Node(name, null);
+            root = new Node(name, name, null);
             rootByName.put(name, root);
             roots.add(root);
         }
@@ -520,21 +637,32 @@ public final class NavigationWidget {
                 return child;
             }
         }
-        Node node = new Node(name, null);
+        Node node = new Node(name, name, null);
         parent.children.add(node);
         return node;
     }
 
+    private Node findChild(Node parent, String name) {
+        for (Node child : parent.children) {
+            if (!child.isLeaf() && child.label.equals(name)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
     private static final class Node {
         final String label;
+        final String searchText;
         final Runnable onClick;
         boolean expanded = false;
         boolean warn = false;
         int count = -1;
         final List<Node> children = new ArrayList<>();
 
-        Node(String label, Runnable onClick) {
+        Node(String label, String searchText, Runnable onClick) {
             this.label = label;
+            this.searchText = searchText;
             this.onClick = onClick;
         }
 
@@ -548,6 +676,22 @@ public final class NavigationWidget {
                 total += child.isLeaf() ? 1 : child.leafCount();
             }
             return total;
+        }
+    }
+
+    private static final class Row {
+        final Node node;
+        final int y;
+        final int height;
+        final int depth;
+        final List<String> path;
+
+        Row(Node node, int y, int height, int depth, List<String> path) {
+            this.node = node;
+            this.y = y;
+            this.height = height;
+            this.depth = depth;
+            this.path = path;
         }
     }
 

@@ -84,7 +84,7 @@ public final class EquipmentScreen extends SplitPaneScreen {
             boolean warn = target == null || target.isBlank()
                 || (!e.isTag() && !registryIndex.isKnown("entity", target))
                 || e.dropChance() > 50.0f;
-            navWidget.markEntryWarn(label, warn);
+            navWidget.markEntryWarn(segments, label, warn);
         }
         if (!readOnly) {
             navWidget.addCategory("Actions");

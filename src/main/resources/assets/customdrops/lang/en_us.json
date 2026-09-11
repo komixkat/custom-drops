@@ -2,6 +2,9 @@
   "customdrops.menu.title": "Custom Drops",
   "customdrops.menu.settings": "Settings",
   "customdrops.menu.browse": "Browse Loot Tables",
+  "customdrops.menu.tags": "Browse Tags",
+  "customdrops.menu.imports": "Imports",
+  "customdrops.menu.chaos": "CHAOS: Lootstorm",
   "customdrops.menu.save": "Save",
   "customdrops.menu.back": "Back",
   "customdrops.menu.done": "Done",
@@ -12,18 +15,17 @@
   "customdrops.menu.unsaved.cancel": "Cancel",
   "customdrops.menu.unsaved.saving": "Saving config...",
   "customdrops.menu.unsaved.saved": "Config saved.",
-  "customdrops.config.presets.apply": "Apply this preset",
 
   "customdrops.config.category.mobDrops": "Mob Drops",
-  "customdrops.config.mobDrops.description": "Control what a specific mob (or entity tag) drops when it dies. Each entry can add items on top of (or instead of) its normal drops.",
+  "customdrops.config.mobDrops.description": "Sets what a mob drops when it dies.",
   "customdrops.config.category.blockDrops": "Block Drops",
-  "customdrops.config.blockDrops.description": "Control what a specific block (or block tag) drops when broken.",
+  "customdrops.config.blockDrops.description": "Sets what a block drops when broken.",
   "customdrops.config.category.chestLoot": "Chest Loot",
-  "customdrops.config.chestLoot.description": "Control any loot table by its id - not just chests. Dungeon and village chests, trial chamber vault rewards, suspicious sand and gravel, and more all work here. See the Browse screen for real ids.",
+  "customdrops.config.chestLoot.description": "Sets chests, vaults and more by loot table id.",
   "customdrops.config.category.fishingLoot": "Fishing Loot",
-  "customdrops.config.fishingLoot.description": "Control fishing-specific loot tables (the overall pool, or just the fish, junk, or treasure sub-pools). Works the same way as Chest Loot, kept separate for organization.",
+  "customdrops.config.fishingLoot.description": "Sets fish, junk and treasure drops.",
   "customdrops.config.category.equipment": "Equipment Drop Overrides",
-  "customdrops.config.equipment.description": "Force a mob's held or worn item to always drop on death, instead of the normal small chance. This does not add new items - it only affects equipment the mob already spawned with.",
+  "customdrops.config.equipment.description": "Forces held or worn items to always drop.",
 
   "customdrops.config.wildcard.hint": "Tip: end the target with * to match every loot table starting with that prefix (e.g. minecraft:chests/village/*).",
 
@@ -65,24 +67,22 @@
   "customdrops.config.search.previous": "Previous",
   "customdrops.config.search.next": "Next",
 
-  "customdrops.config.exportImport": "Export / Import",
-  "customdrops.config.export": "Export Config",
-  "customdrops.config.export.desc": "Copy the current configuration as a base64 string to share or backup.",
+  "customdrops.config.exportImport": "Codes",
+  "customdrops.config.export": "Copy Config Code",
+  "customdrops.config.export.desc": "Copy the config as a code to share or back up.",
   "customdrops.config.export.copyHint": "Select all (Ctrl+A) and copy (Ctrl+C), or use the button below:",
   "customdrops.config.export.copy": "Copy to Clipboard",
   "customdrops.config.import": "Import Config",
-  "customdrops.config.import.prompt": "Paste a base64-encoded config string below:",
+  "customdrops.config.import.prompt": "Paste a config code below:",
   "customdrops.config.import.invalid": "Invalid config data. Could not decode or parse.",
   "customdrops.config.import.success": "Config imported successfully.",
   "customdrops.config.export.success": "Config copied to clipboard.",
-
-  "customdrops.config.presets.description": "Picking a preset replaces every category's entries with that preset's defaults. Leave on 'none' to configure everything yourself.",
-  "customdrops.config.presets.active": "Active preset",
 
   "customdrops.config.equipment.slot": "Equipment slot",
 
 "customdrops.config.serverInfo.title": "Connected Server",
   "customdrops.config.serverInfo.none": "Not connected to a Custom Drops server.",
   "customdrops.config.server": "Server Config",
-  "customdrops.menu.configs": "Configs"
+  "customdrops.menu.configs": "Configs",
+  "customdrops.config.defaults.active": "Default Values"
 }

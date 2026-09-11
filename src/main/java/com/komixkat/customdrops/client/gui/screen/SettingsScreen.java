@@ -29,9 +29,13 @@ public final class SettingsScreen extends SplitPaneScreen {
     protected void buildNavigation() {
         navWidget.addCategory("Settings");
         navWidget.addEntry("Settings", "Category Toggles", () -> {});
-        navWidget.addEntry("Settings", "Configs (profiles / reset)", () ->
+        navWidget.addEntry("Settings", "Imports", () ->
+            this.minecraft.gui.setScreen(new ImportsScreen(this)));
+        navWidget.addEntry("Settings", "CHAOS: Lootstorm", () ->
+            this.minecraft.gui.setScreen(new ChaosScreen(this)));
+        navWidget.addEntry("Settings", "Configs (saves / reset)", () ->
             this.minecraft.gui.setScreen(new ConfigsScreen(this)));
-        navWidget.addEntry("Settings", "Export / Import", () ->
+        navWidget.addEntry("Settings", "Codes", () ->
             this.minecraft.gui.setScreen(new ExportImportScreen(this)));
         navWidget.addEntry("Settings", "Server Config", () ->
             this.minecraft.gui.setScreen(new ServerConfigScreen(this)));
@@ -47,9 +51,9 @@ public final class SettingsScreen extends SplitPaneScreen {
 
         pane.addLabel(cur.x, cur.y, "Category Toggles", Ui.TEXT);
         cur.y += Ui.LINE_H + 8;
-        pane.addLabel(cur.x, cur.y, "Disabled categories are skipped by the loot injector.", Ui.MUTED);
+        pane.addLabel(cur.x, cur.y, "Off categories are skipped.", Ui.MUTED);
         cur.y += Ui.LINE_H + 6;
-        pane.addLabel(cur.x, cur.y, "Changes apply to memory; press Save to write to disk.", Ui.DIM);
+        pane.addLabel(cur.x, cur.y, "Press Save to write changes to disk.", Ui.DIM);
         cur.y += 18;
 
         pane.addCheckbox(cur.x, cur.y, "Mob Drops", config.mobDropsEnabled(), v -> toggle(v, () -> {
@@ -79,9 +83,9 @@ public final class SettingsScreen extends SplitPaneScreen {
 
         pane.addLabel(cur.x, cur.y, "Tools", Ui.TEXT);
         cur.y += Ui.LINE_H + 6;
-        pane.addButton(cur, cur.x, cur.y, Math.min(220, cur.w), "Configs (switch profile / reset)", () ->
+        pane.addButton(cur, cur.x, cur.y, Math.min(220, cur.w), "Configs (switch saves / reset)", () ->
             this.minecraft.gui.setScreen(new ConfigsScreen(this)));
-        pane.addButton(cur, cur.x, cur.y + Ui.BUTTON_H + 4, Math.min(220, cur.w), "Export / Import Config", () ->
+        pane.addButton(cur, cur.x, cur.y + Ui.BUTTON_H + 4, Math.min(220, cur.w), "Codes (share a config)", () ->
             this.minecraft.gui.setScreen(new ExportImportScreen(this)));
         pane.addButton(cur, cur.x, cur.y + 2 * (Ui.BUTTON_H + 4), Math.min(220, cur.w), "Server Config (view / edit)", () ->
             this.minecraft.gui.setScreen(new ServerConfigScreen(this)));

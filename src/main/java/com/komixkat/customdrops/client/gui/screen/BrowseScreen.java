@@ -52,6 +52,10 @@ public final class BrowseScreen extends SplitPaneScreen {
             .sorted(Map.Entry.comparingByKey())
             .forEach(e -> navWidget.addEntry("Loot Tables",
                 e.getKey() + " (" + e.getValue() + ")", () -> setGroup(e.getKey())));
+
+        navWidget.addCategory("Tags");
+        navWidget.addEntry("Tags", "Tags list\u2026", () ->
+            this.minecraft.gui.setScreen(new TagsBrowserScreen(this)));
     }
 
     @Override

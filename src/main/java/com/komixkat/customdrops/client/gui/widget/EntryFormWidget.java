@@ -81,6 +81,7 @@ public final class EntryFormWidget<T> {
     private final SplitPaneScreen owner;
     private final Host<T> host;
     private final ScrollablePane pane;
+    private final net.minecraft.client.gui.Font font;
 
     private int index = -1;
     private boolean open = false;
@@ -89,12 +90,14 @@ public final class EntryFormWidget<T> {
     private String targetId = "";
     private boolean isTag = false;
     private boolean replace = false;
+    private net.minecraft.client.gui.components.Checkbox tagCb;
     private List<LootItemEntry> items = List.of();
     private String formNotice = "";
 
     public EntryFormWidget(SplitPaneScreen owner, Host<T> host, int x, int y, int width, int height) {
         this.owner = owner;
         this.host = host;
+        this.font = net.minecraft.client.Minecraft.getInstance().font;
         this.pane = new ScrollablePane(owner, x, y, width, height);
     }
 
@@ -150,17 +153,20 @@ public final class EntryFormWidget<T> {
         if (!open) return;
 
         ScrollablePane.Cursor cur = pane.newCursor();
+        int headY = cur.y;
 
-        pane.addLabel(cur.x, cur.y - 1, "Editing" + (readOnly ? " (read-only)" : ""), Ui.MUTED);
-        pane.addLabel(cur.x, cur.y + Ui.LINE_H, targetId.isEmpty() ? "(untitled)" : targetId, Ui.ACCENT);
+        pane.addLabel(cur.x, headY - 1, "Editing" + (readOnly ? " (read-only)" : ""), Ui.MUTED);
+        pane.addLabel(cur.x, headY + Ui.LINE_H, targetId.isEmpty() ? "(untitled)" : targetId, Ui.ACCENT);
 
         if (!readOnly) {
-            int actionY = cur.y + Ui.LINE_H - 1;
-            pane.addButton(cur, cur.right() - 70, actionY, 66, "+ Add Item", this::addItem);
-            pane.addButton(cur, cur.right() - 152, actionY, 78, "Duplicate", this::duplicateEntry);
-            pane.addButton(cur, cur.right() - 244, actionY, 88, "Delete Entry", this::deleteEntry);
+            int actionY = headY + 2 * Ui.LINE_H + 6;
+            int consumed = layoutPillRow(pane, cur, actionY,
+                java.util.List.of("+ Add Item", "Duplicate", "Delete Entry"),
+                java.util.List.of(this::addItem, this::duplicateEntry, this::deleteEntry));
+            cur.y = actionY + consumed + 8;
+        } else {
+            cur.y = headY + 2 * Ui.LINE_H + 12;
         }
-        cur.y += 2 * Ui.LINE_H + 22;
 
         if (!formNotice.isEmpty()) {
             pane.addLabel(cur.x, cur.y, formNotice, Ui.MUTED);
@@ -168,21 +174,56 @@ public final class EntryFormWidget<T> {
         }
 
         pane.addLabel(cur.x, cur.y, host.targetFieldLabel(), Ui.MUTED);
-        boolean hasVanillaLink = host.supportsVanillaLink() && !readOnly;
-        boolean hasLoadDefaults = host.supportsLoadDefaults() && !readOnly;
-        int buttonRowY = cur.y + Ui.LINE_H + 2;
-        if (hasLoadDefaults) {
-            pane.addButton(cur, cur.right() - 204, buttonRowY, 100, "Load Defaults", this::loadDefaults);
-        }
-        if (hasVanillaLink) {
-            pane.addButton(cur, cur.right() - 96, buttonRowY, 92, "View Vanilla", this::openVanilla);
-        }
+        boolean tagMode = isTag;
+        boolean hasVanillaLink = host.supportsVanillaLink() && !readOnly && !tagMode;
+        boolean hasLoadDefaults = host.supportsLoadDefaults() && !readOnly && !tagMode;
         int reserve = (hasVanillaLink ? 104 : 0) + (hasLoadDefaults ? 108 : 0);
-        RegistryAutocompleteField targetBox = pane.addAutocomplete(cur.x, cur.y + Ui.LINE_H + 3,
-            cur.w - reserve,
-            targetId, this::onTargetChanged, java.util.Set.of(host.lookupKind()));
-        targetBox.setEditable(!readOnly);
-        cur.y += Ui.LINE_H + Ui.FIELD_H + 10;
+        if (reserve > 0 && cur.w - reserve < 120) {
+            RegistryAutocompleteField targetBox = pane.addAutocomplete(cur.x, cur.y + Ui.LINE_H + 3,
+                cur.w, targetId, this::onTargetChanged, java.util.Set.of(host.lookupKind()));
+            targetBox.setEditable(!readOnly);
+            cur.y += Ui.LINE_H + Ui.FIELD_H + 4;
+            java.util.List<String> labels = new java.util.ArrayList<>();
+            java.util.List<Runnable> actions = new java.util.ArrayList<>();
+            if (hasLoadDefaults) {
+                labels.add("Load Defaults");
+                actions.add(this::loadDefaults);
+            }
+            if (hasVanillaLink) {
+                labels.add("View Vanilla");
+                actions.add(this::openVanilla);
+            }
+            cur.y += layoutPillRow(pane, cur, cur.y, labels, actions) + 8;
+        } else {
+            int buttonRowY = cur.y + Ui.LINE_H + 2;
+            if (hasLoadDefaults) {
+                pane.addButton(cur, Math.max(cur.x, cur.right() - 204), buttonRowY, 100,
+                    "Load Defaults", this::loadDefaults);
+            }
+            if (hasVanillaLink) {
+                pane.addButton(cur, Math.max(cur.x, cur.right() - 96), buttonRowY, 92,
+                    "View Vanilla", this::openVanilla);
+            }
+            RegistryAutocompleteField targetBox = pane.addAutocomplete(cur.x, cur.y + Ui.LINE_H + 3,
+                cur.w - reserve,
+                targetId, this::onTargetChanged, java.util.Set.of(host.lookupKind()));
+            targetBox.setEditable(!readOnly);
+            cur.y += Ui.LINE_H + Ui.FIELD_H + 10;
+        }
+        if (tagMode) {
+            if (host.supportsVanillaLink() || host.supportsLoadDefaults()) {
+                pane.addLabel(cur.x, cur.y, "Load Defaults needs a concrete id, not a tag.", Ui.DIM);
+                cur.y += Ui.LINE_H + 4;
+            }
+            pane.addLabel(cur.x, cur.y,
+                "Examples: #minecraft:zombies, #minecraft:logs, #minecraft:monsters.", Ui.DIM);
+            cur.y += Ui.LINE_H + 4;
+            if (!targetId.isEmpty() && !readOnly) {
+                pane.addButton(cur, cur.x, cur.y, 178, "Browse entries in this tag",
+                    () -> owner.openTagBrowser(targetId));
+                cur.y += Ui.BUTTON_H + 6;
+            }
+        }
 
         pane.addCheckbox(cur.x, cur.y, "Replace vanilla table entirely", replace,
             v -> {
@@ -191,7 +232,7 @@ public final class EntryFormWidget<T> {
         cur.y += Ui.CHECKBOX_H + 4;
 
         if (host.supportsTags()) {
-            pane.addCheckbox(cur.x, cur.y, "Use as tag (#prefix)", isTag,
+            tagCb = pane.addCheckbox(cur.x, cur.y, "Use as tag (#prefix)", isTag,
                 v -> {
                     if (!readOnly) setIsTag(v);
                 });
@@ -244,11 +285,20 @@ int totalWeight = 0;
     private void buildItemBlock(ScrollablePane.Cursor cur, int itemIndex, int totalWeight) {
         pane.addDivider(cur.x, cur.y, cur.w);
         cur.y += 8;
-        pane.addLabel(cur.x, cur.y + 4, "Item " + (itemIndex + 1) + " of " + items.size(), Ui.SECTION_TEXT);
+        String itemLabel = "Item " + (itemIndex + 1) + " of " + items.size();
+        int itemLabelW = font.width(itemLabel);
+        boolean removeOnRow = cur.w >= itemLabelW + 96 + 14;
+        pane.addLabel(cur.x, cur.y + 4, itemLabel, Ui.SECTION_TEXT);
         if (!readOnly) {
-            pane.addButton(cur, cur.right() - 96, cur.y + 2, 92, "Remove", () -> removeItem(itemIndex));
+            if (removeOnRow) {
+                pane.addButton(cur, Math.max(cur.x + itemLabelW + 14, cur.right() - 96), cur.y + 2, 92,
+                    "Remove", () -> removeItem(itemIndex));
+            } else {
+                pane.addButton(cur, cur.x, cur.y + Ui.LINE_H + 8, 92,
+                    "Remove", () -> removeItem(itemIndex));
+            }
         }
-        cur.y += 30;
+        cur.y += removeOnRow ? 30 : (Ui.LINE_H + Ui.BUTTON_H + 20);
 
         LootItemEntry item = items.get(itemIndex);
         int labW = 62;
@@ -622,8 +672,46 @@ int totalWeight = 0;
         commit();
     }
 
+    /**
+     * Lays out pill buttons right-aligned on one row when they fit within {@code cur.w},
+     * otherwise stacks them vertically at the left edge. Returns the height consumed.
+     */
+    private int layoutPillRow(ScrollablePane pane, ScrollablePane.Cursor cur, int y,
+                              java.util.List<String> labels, java.util.List<Runnable> actions) {
+        int gap = 4;
+        int[] widths = new int[labels.size()];
+        int totalW = 0;
+        for (int i = 0; i < labels.size(); i++) {
+            widths[i] = font.width(labels.get(i)) + 14;
+            totalW += widths[i] + (i > 0 ? gap : 0);
+        }
+        if (totalW <= cur.w) {
+            int x = cur.right() - gap;
+            for (int i = labels.size() - 1; i >= 0; i--) {
+                x -= widths[i];
+                pane.addButton(cur, Math.max(cur.x, x), y, Math.min(widths[i], cur.w), labels.get(i), actions.get(i));
+                x -= gap;
+            }
+        } else {
+            int yy = y;
+            for (int i = 0; i < labels.size(); i++) {
+                pane.addButton(cur, cur.x, yy, Math.min(widths[i], cur.w), labels.get(i), actions.get(i));
+                yy += Ui.BUTTON_H + 2;
+            }
+        }
+        if (labels.isEmpty()) return 0;
+        int rowCount = totalW <= cur.w ? 1 : labels.size();
+        return rowCount * (Ui.BUTTON_H + 2) + 2;
+    }
+
     private void onTargetChanged(String value) {
-        targetId = value == null ? "" : value;
+        String raw = value == null ? "" : value;
+        if (host.supportsTags() && raw.startsWith("#")) {
+            targetId = raw.substring(1);
+            isTag = true;
+        } else {
+            targetId = raw;
+        }
         commit();
         owner.onTargetIdEdited(targetId);
     }
@@ -631,7 +719,9 @@ int totalWeight = 0;
     private void commit() {
         if (!open || index < 0 || index >= host.list().size()) return;
         if (readOnly) return;
-        T built = host.build(targetId, isTag, replace, List.copyOf(items));
+        String storedId = isTag && !targetId.contains(":") ? "minecraft:" + targetId : targetId;
+        if (storedId == null || storedId.isBlank() || "minecraft:".equals(storedId)) return;
+        T built = host.build(storedId, isTag, replace, List.copyOf(items));
         if (Objects.equals(host.list().get(index), built)) return;
         host.list().set(index, built);
         owner.markChanged();

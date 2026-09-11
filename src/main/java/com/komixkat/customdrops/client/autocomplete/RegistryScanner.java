@@ -20,6 +20,7 @@ public final class RegistryScanner {
     private final Set<String> enchantmentIds = new HashSet<>();
     private final Set<String> lootTableIds = new HashSet<>();
     private final Map<String, String> tagKinds = new HashMap<>();
+    private final Set<String> addedTagIds = new HashSet<>();
 
     public void scan() {
         entriesByNamespace.clear();
@@ -30,6 +31,7 @@ public final class RegistryScanner {
         enchantmentIds.clear();
         lootTableIds.clear();
         tagKinds.clear();
+        addedTagIds.clear();
 
         scanRegistry(BuiltInRegistries.ENTITY_TYPE, "entity");
         scanRegistry(BuiltInRegistries.BLOCK, "block");
@@ -41,9 +43,7 @@ public final class RegistryScanner {
         mergeBundledIds("item",
             com.komixkat.customdrops.registry.VanillaIdRegistry.droppableItemIds(), itemIds);
         scanEnchantments();
-        scanTags(BuiltInRegistries.ENTITY_TYPE, "entity");
-        scanTags(BuiltInRegistries.BLOCK, "block");
-        scanTags(BuiltInRegistries.ITEM, "item");
+        scanTags();
         scanLootTables();
 
         logCompleteness();
@@ -68,8 +68,9 @@ public final class RegistryScanner {
         boolean whiteDyeKnown = itemIds.contains("minecraft:white_dye");
         int bundled = com.komixkat.customdrops.registry.VanillaIdRegistry.bundledDroppableCount();
         com.komixkat.customdrops.CustomDropsMod.LOGGER.info(
-            "Registry scan complete: {} items (white_dye known: {}, bundled fallback source: {} ids), {} blocks, {} entities.",
-            itemCount, whiteDyeKnown, bundled, blockCount, entityCount);
+            "Registry scan complete: {} items (white_dye known: {}, bundled fallback source: {} ids), {} blocks, {} entities, {} tags (sample: {}).",
+            itemCount, whiteDyeKnown, bundled, blockCount, entityCount, tagKinds.size(),
+            tagKinds.keySet().stream().limit(12).toList());
         com.komixkat.customdrops.CustomDropsMod.LOGGER.debug(
             "Registry scan kinds unavailable entries count per namespace: {}", entriesByNamespace.size());
     }
@@ -119,16 +120,76 @@ public final class RegistryScanner {
         "minecraft:channeling", "minecraft:multishot", "minecraft:quick_charge", "minecraft:piercing",
         "minecraft:density", "minecraft:breach", "minecraft:wind_burst");
 
-    private <T> void scanTags(net.minecraft.core.Registry<T> registry, String kind) {
+    private void scanTags() {
+        scanTagsFromStatic(BuiltInRegistries.ENTITY_TYPE, "entity");
+        scanTagsFromStatic(BuiltInRegistries.BLOCK, "block");
+        scanTagsFromStatic(BuiltInRegistries.ITEM, "item");
+        scanTagsFromLive();
+        mergeBundledTags(VANILLA_ENTITY_TAG_IDS, "entity");
+        mergeBundledTags(VANILLA_BLOCK_TAG_IDS, "block");
+    }
+
+    private <T> void scanTagsFromStatic(net.minecraft.core.Registry<T> registry, String kind) {
         try {
-            registry.getTags().forEach(named -> {
-                String tagId = "#" + named.key().location().toString();
-                allEntries.add(tagId);
-                tagKinds.put(tagId, kind);
-            });
+            registry.getTags().forEach(named -> addTag(named.key().location().toString(), kind));
         } catch (Exception ignored) {
         }
     }
+
+    private void scanTagsFromLive() {
+        try {
+            net.minecraft.client.multiplayer.ClientPacketListener connection =
+                net.minecraft.client.Minecraft.getInstance().getConnection();
+            if (connection == null) return;
+            net.minecraft.core.HolderLookup.Provider access = connection.registryAccess();
+            addLiveTags(access, net.minecraft.core.registries.Registries.ENTITY_TYPE, "entity");
+            addLiveTags(access, net.minecraft.core.registries.Registries.BLOCK, "block");
+            addLiveTags(access, net.minecraft.core.registries.Registries.ITEM, "item");
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private <T> void addLiveTags(net.minecraft.core.HolderLookup.Provider access,
+                                 net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> registryKey,
+                                 String kind) {
+        access.lookupOrThrow(registryKey).listTags()
+            .forEach(named -> addTag(named.key().location().toString(), kind));
+    }
+
+    private void mergeBundledTags(List<String> tags, String kind) {
+        for (String id : tags) {
+            addTag(id, kind);
+        }
+    }
+
+    private void addTag(String id, String kind) {
+        if (id == null || id.indexOf(':') < 0) return;
+        String entry = "#" + id;
+        if (addedTagIds.add(entry)) {
+            allEntries.add(entry);
+            tagKinds.put(entry, kind);
+        }
+    }
+
+    private static final List<String> VANILLA_ENTITY_TAG_IDS = List.of(
+        "minecraft:skeletons", "minecraft:zombies", "minecraft:raiders",
+        "minecraft:undead", "minecraft:arthropod", "minecraft:aquatic",
+        "minecraft:bosses", "minecraft:fall_damage_immune",
+        "minecraft:beehive_inhabitors", "minecraft:can_breathe_under_water",
+        "minecraft:axolotl_always_hostiles", "minecraft:axolotl_tempt_hostiles",
+        "minecraft:powder_snow_walkable_mobs", "minecraft:freeze_immune_entity_types",
+        "minecraft:sensitive_to_smite", "minecraft:immediate_respawn_requirements");
+
+    private static final List<String> VANILLA_BLOCK_TAG_IDS = List.of(
+        "minecraft:logs", "minecraft:logs_that_burn", "minecraft:planks",
+        "minecraft:wool", "minecraft:wool_carpets", "minecraft:leaves",
+        "minecraft:saplings", "minecraft:wooden_doors", "minecraft:doors",
+        "minecraft:wooden_slabs", "minecraft:slabs", "minecraft:wooden_stairs",
+        "minecraft:stairs", "minecraft:wooden_fences", "minecraft:fences",
+        "minecraft:fence_gates", "minecraft:stone_bricks", "minecraft:anvil",
+        "minecraft:candles", "minecraft:flowers", "minecraft:nylium",
+        "minecraft:sand", "minecraft:terracotta", "minecraft:ice",
+        "minecraft:snow", "minecraft:replaceable");
 
     private <T> void scanRegistry(net.minecraft.core.Registry<T> registry, String category) {
         Set<String> target = switch (category) {

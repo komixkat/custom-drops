@@ -1,14 +1,12 @@
 package com.komixkat.customdrops;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.komixkat.customdrops.config.ConfigLoader;
 import com.komixkat.customdrops.config.ConfigProfiles;
 import com.komixkat.customdrops.config.CustomDropsConfig;
 import com.komixkat.customdrops.loot.LootTableInjector;
 import com.komixkat.customdrops.network.OpenGuiPayload;
 import com.komixkat.customdrops.network.SyncPayload;
-import com.komixkat.customdrops.preset.PresetLoader;
 import com.komixkat.customdrops.registry.VanillaLootTableRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -46,7 +44,6 @@ public final class CustomDropsMod implements ModInitializer {
 
         ConfigProfiles.ensureGlobal();
         config = ConfigLoader.load(ConfigProfiles.activeDir());
-        PresetLoader.applyActivePreset(config);
         warnOnUnknownLootTableIds(config);
 
         injector = new LootTableInjector(() -> config);
@@ -60,40 +57,32 @@ public final class CustomDropsMod implements ModInitializer {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
             SyncPayload.sendTo(handler.getPlayer(), config));
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.register(Commands.literal("customdrops")
-                .then(Commands.literal("gui")
-                    .requires(source -> source.isPlayer())
-                    .executes(context -> {
-                        ServerPlayer player = context.getSource().getPlayerOrException();
-                        ServerPlayNetworking.send(player, new OpenGuiPayload());
-                        return Command.SINGLE_SUCCESS;
-                    }))
-                .then(Commands.literal("reload")
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+            dispatcher.register(Commands.literal("cd")
+                .then(Commands.literal("gui").executes(context -> {
+                    MinecraftServer server = context.getSource().getServer();
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    ServerPlayNetworking.send(player, new OpenGuiPayload());
+                    context.getSource().sendSuccess(
+                        () -> Component.literal("Opening the Custom Drops menu."),
+                        false);
+                    return Command.SINGLE_SUCCESS;
+                }))
+                .then(Commands.literal("reset")
                     .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                     .executes(context -> {
                         MinecraftServer server = context.getSource().getServer();
-                        reloadConfig(server);
-                        server.reloadResources(server.getPackRepository().getSelectedIds())
-                            .thenRun(() -> {
-                                context.getSource().sendSuccess(
-                                    () -> Component.literal("Custom Drops config and loot tables reloaded."), true);
-                                SyncPayload.broadcast(server, config);
-                            })
-                            .exceptionally(throwable -> {
-                                LOGGER.error("Failed to reload resources after config change", throwable);
-                                context.getSource().sendFailure(Component.literal(
-                                    "Custom Drops config reloaded, but the resource reload failed; see server log."));
-                                return null;
-                            });
+                        clearWorldConfig(server);
+                        resetActiveConfig(server);
+                        context.getSource().sendSuccess(
+                            () -> Component.literal("Reset to vanilla: active config emptied and this world's own config removed."),
+                            true);
                         return Command.SINGLE_SUCCESS;
-                    })));
-        });
+                    }))));
     }
 
     private void onServerStarted(MinecraftServer server) {
         config = ConfigLoader.loadWithWorldOverride(ConfigProfiles.activeDir(), worldConfigDir(server));
-        PresetLoader.applyActivePreset(config);
         warnOnUnknownLootTableIds(config);
         LOGGER.info("Custom Drops applied world config for '{}': {} mob entries, {} block entries, {} chest entries, {} fishing entries, {} equipment overrides",
             server.getWorldData().getLevelName(), config.mobDrops().size(), config.blockDrops().size(),
@@ -102,17 +91,26 @@ public final class CustomDropsMod implements ModInitializer {
 
     private void onServerStopping(MinecraftServer server) {
         config = ConfigLoader.load(ConfigProfiles.activeDir());
-        PresetLoader.applyActivePreset(config);
     }
 
     public static void reloadConfig(MinecraftServer server) {
         config = ConfigLoader.loadWithWorldOverride(ConfigProfiles.activeDir(), worldConfigDir(server));
-        PresetLoader.applyActivePreset(config);
         warnOnUnknownLootTableIds(config);
         injector.reinject();
         LOGGER.info("Custom Drops config reloaded, {} mob entries, {} block entries, {} chest entries, {} fishing entries, {} equipment overrides",
             config.mobDrops().size(), config.blockDrops().size(), config.chestLoot().size(),
             config.fishingLoot().size(), config.equipmentOverrides().size());
+    }
+
+    public static void resetActiveConfig(MinecraftServer server) {
+        ConfigProfiles.resetActiveToVanilla();
+        reloadConfig(server);
+        server.reloadResources(server.getPackRepository().getSelectedIds())
+            .thenRun(() -> SyncPayload.broadcast(server, config))
+            .exceptionally(throwable -> {
+                LOGGER.error("Failed to reload resources after config reset", throwable);
+                return null;
+            });
     }
 
     public static java.nio.file.Path globalConfigDir() {
@@ -130,7 +128,6 @@ public final class CustomDropsMod implements ModInitializer {
 
     public static void reloadFromProfile() {
         config = ConfigLoader.load(ConfigProfiles.activeDir());
-        PresetLoader.applyActivePreset(config);
         warnOnUnknownLootTableIds(config);
         injector.reinject();
         LOGGER.info("Custom Drops active profile switched to \"{}\": {} mob, {} block, {} chest, {} fishing, {} equipment",
@@ -157,10 +154,10 @@ public final class CustomDropsMod implements ModInitializer {
         return server.getWorldPath(LevelResource.ROOT).resolve(MOD_ID);
     }
 
-    public static void linkActiveProfileToWorld(MinecraftServer server) {
+    public static void linkConfigToWorld(MinecraftServer server, String configName) {
         if (server == null) return;
         Path worldDir = worldConfigDir(server);
-        Path srcDir = ConfigProfiles.activeDir();
+        Path srcDir = ConfigProfiles.dirFor(configName);
         try {
             Files.createDirectories(worldDir);
         } catch (IOException e) {
@@ -179,17 +176,27 @@ public final class CustomDropsMod implements ModInitializer {
         }
     }
 
-    public static void unlinkWorldConfig(MinecraftServer server) {
-        if (server == null) return;
+    public static boolean clearWorldConfig(MinecraftServer server) {
+        if (server == null) return false;
         Path worldDir = worldConfigDir(server);
-        for (String file : List.of("meta.json", "mob_drops.json", "block_drops.json",
-            "chest_loot.json", "fishing_loot.json", "equipment_overrides.json")) {
-            try {
-                Files.deleteIfExists(worldDir.resolve(file));
-            } catch (IOException e) {
-                LOGGER.warn("Could not delete world config file {}", worldDir.resolve(file), e);
+        boolean removedAnything = false;
+        try {
+            for (String file : List.of("meta.json", "mob_drops.json", "block_drops.json",
+                "chest_loot.json", "fishing_loot.json", "equipment_overrides.json")) {
+                removedAnything |= Files.deleteIfExists(worldDir.resolve(file));
             }
+            try (java.util.stream.Stream<Path> remaining = Files.list(worldDir)) {
+                if (remaining.findAny().isEmpty()) {
+                    Files.deleteIfExists(worldDir);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Could not clear per-world config directory {}", worldDir, e);
         }
+        if (removedAnything) {
+            LOGGER.info("Cleared per-world config in {}", worldDir);
+        }
+        return removedAnything;
     }
 
     private static void warnOnUnknownLootTableIds(CustomDropsConfig config) {

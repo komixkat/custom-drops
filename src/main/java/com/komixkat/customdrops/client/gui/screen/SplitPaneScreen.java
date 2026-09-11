@@ -36,6 +36,8 @@ public abstract class SplitPaneScreen extends Screen {
     private boolean dirty = false;
     private Button saveButton;
     private Button backButton;
+    private String toastMessage = "";
+    private long toastUntil = 0;
 
     protected SplitPaneScreen(Screen parent, Component title) {
         super(title);
@@ -62,11 +64,18 @@ public abstract class SplitPaneScreen extends Screen {
         contentBottom = height - BOTTOM_BAR_HEIGHT - PADDING;
 
         navWidget = new NavigationWidget(PADDING, PADDING, navWidth, Math.max(0, height - BOTTOM_BAR_HEIGHT - PADDING * 2));
+        registryIndex.build();
         buildNavigation();
         initContent();
         addBottomBar();
-        registryIndex.build();
         afterInit();
+    }
+
+    @Override
+    public void repositionElements() {
+        clearWidgets();
+        clearFocus();
+        init();
     }
 
     protected void afterInit() {
@@ -141,6 +150,12 @@ public abstract class SplitPaneScreen extends Screen {
         this.minecraft.gui.setScreen(new DefaultValuesScreen(this, id));
     }
 
+    public void openTagBrowser(String tagId) {
+        if (tagId == null) return;
+        String clean = tagId.startsWith("#") ? tagId.substring(1) : tagId;
+        this.minecraft.gui.setScreen(new TagsBrowserScreen(this, clean));
+    }
+
     protected void updateSaveButton() {
         if (saveButton != null) {
             saveButton.active = isDirty();
@@ -188,6 +203,16 @@ public abstract class SplitPaneScreen extends Screen {
             if (child instanceof RegistryAutocompleteField f) {
                 f.renderPopupLast(guiGraphics, mouseX, mouseY, delta);
             }
+        }
+
+        if (!toastMessage.isEmpty() && System.currentTimeMillis() < toastUntil) {
+            int tw = font.width(toastMessage);
+            int tx = width - tw - PADDING - 8;
+            int ty = PADDING;
+            guiGraphics.fill(tx - 5, ty - 3, tx + tw + 5, ty + Ui.LINE_H + 6, 0xCC14161C);
+            guiGraphics.fill(tx - 5, ty - 3, tx + tw + 5, ty - 2, 0xFF3A3A44);
+            guiGraphics.fill(tx - 5, ty + Ui.LINE_H + 1, tx + tw + 5, ty + Ui.LINE_H + 6, 0xFF25252B);
+            guiGraphics.text(font, toastMessage, tx, ty + 1, Ui.ACCENT, false);
         }
     }
 
@@ -238,7 +263,9 @@ public abstract class SplitPaneScreen extends Screen {
             return true;
         }
         if (mouseX < navWidth + PADDING && navWidget != null) {
-            return navWidget.mouseClicked(mouseX, mouseY, button);
+            if (navWidget.mouseClicked(mouseX, mouseY, button)) {
+                return true;
+            }
         }
         if (contentMouseClicked(mouseX, mouseY, button)) {
             return true;
@@ -300,11 +327,17 @@ public abstract class SplitPaneScreen extends Screen {
         markDirty();
     }
 
+    protected final void showToast(String message) {
+        toastMessage = message;
+        toastUntil = System.currentTimeMillis() + 2500;
+    }
+
     protected void save() {
         CustomDropsMod.saveGlobalConfig();
         CustomDropsMod.reloadForRunningWorld();
         dirty = false;
         updateSaveButton();
+        showToast("Saved \u2713 - applied to the running world");
         onSaved();
     }
 
